@@ -1,0 +1,25 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+    gateway:
+      mvc:
+        filters:
+          - name: JwtAuthenticationFilter
+        routes:
+          - id: auth-service-route
+            uri: http://auth-service:8081
+            predicates:
+              - Path=/auth/**,/api/time
+          - id: chat-service-route
+            uri: http://chat-service:8082
+            predicates:
+              - Path=/api/chat/**,/api/user/**
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+
+jwt:
+  secret: 5f4e4a3c1e1e7b1f91408eace934ad76d6fa1bc6d97f829ef1f3c9c3b850ffb8
+  expiration: 12000000
