@@ -18,28 +18,28 @@ class _IngredientToggleButtonState extends State<IngredientToggleButton> {
   @override
   Widget build(BuildContext context) {
     ButtonStyle standardTheme = ButtonStyle(
-        minimumSize: const MaterialStatePropertyAll(Size(10, 10)),
-        padding: const MaterialStatePropertyAll(
+        minimumSize: const WidgetStatePropertyAll(Size(10, 10)),
+        padding: const WidgetStatePropertyAll(
             EdgeInsets.symmetric(vertical: 2, horizontal: 12)),
-        shape: MaterialStatePropertyAll(
+        shape: WidgetStatePropertyAll(
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ));
 
     ButtonStyle unselectedTheme = standardTheme.copyWith(
       foregroundColor:
-          MaterialStatePropertyAll(Theme.of(context).colorScheme.primary),
+          WidgetStatePropertyAll(Theme.of(context).colorScheme.primary),
       backgroundColor:
-          MaterialStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
-      textStyle: MaterialStatePropertyAll(
+          WidgetStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
+      textStyle: WidgetStatePropertyAll(
           Theme.of(context).textTheme.labelSmall!.copyWith(height: 1.0)),
     );
 
     ButtonStyle selectedTheme = standardTheme.copyWith(
       foregroundColor:
-          MaterialStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
+          WidgetStatePropertyAll(Theme.of(context).colorScheme.onPrimary),
       backgroundColor:
-          MaterialStatePropertyAll(Theme.of(context).colorScheme.primary),
-      textStyle: MaterialStatePropertyAll(
+          WidgetStatePropertyAll(Theme.of(context).colorScheme.primary),
+      textStyle: WidgetStatePropertyAll(
           Theme.of(context).textTheme.labelSmall!.copyWith(height: 1.0)),
     );
 

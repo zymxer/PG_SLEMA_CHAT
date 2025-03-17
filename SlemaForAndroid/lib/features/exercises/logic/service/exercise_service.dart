@@ -1,7 +1,6 @@
 import 'package:pg_slema/features/exercises/logic/entity/exercise.dart';
 import 'package:pg_slema/features/exercises/logic/repository/exercise_repository.dart';
 import 'package:pg_slema/utils/date/date.dart';
-import 'package:pg_slema/utils/time_of_day/time_of_day_comparing_extension.dart';
 
 class ExerciseService {
   final ExerciseRepository repository;

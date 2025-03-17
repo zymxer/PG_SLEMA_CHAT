@@ -42,11 +42,11 @@ class _GetNotificationWidgetState extends State<GetNotificationWidget> {
           IconButton(
             onPressed: onDeleteClicked,
             style: ButtonStyle(
-              padding: MaterialStateProperty.all(EdgeInsets.zero),
-              iconSize: MaterialStateProperty.all(26),
-              backgroundColor: MaterialStateProperty.all(Colors.transparent),
+              padding: WidgetStateProperty.all(EdgeInsets.zero),
+              iconSize: WidgetStateProperty.all(26),
+              backgroundColor: WidgetStateProperty.all(Colors.transparent),
               iconColor:
-                  MaterialStateProperty.all(Theme.of(context).primaryColor),
+                  WidgetStateProperty.all(Theme.of(context).primaryColor),
             ),
             icon: const Icon(
               Icons.remove_circle_outline,

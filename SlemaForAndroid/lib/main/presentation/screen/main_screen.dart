@@ -10,7 +10,6 @@ import 'package:pg_slema/features/gallery/logic/service/image_service.dart';
 import 'package:pg_slema/features/home/presentation/screen/home_screen.dart';
 import 'package:pg_slema/features/medicine/presentation/screen/all_medicines_screen.dart';
 import 'package:pg_slema/features/gallery/presentation/screen/gallery_screen.dart';
-import 'package:pg_slema/features/picture/presentation/screen/pictures_screen.dart';
 import 'package:pg_slema/features/settings/presentation/screen/settings_screen.dart';
 import 'package:pg_slema/features/well_being/logic/entity/assessment_factory.dart';
 import 'package:pg_slema/features/well_being/logic/service/assessments_service.dart';

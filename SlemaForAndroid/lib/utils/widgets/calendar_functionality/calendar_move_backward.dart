@@ -15,13 +15,13 @@ class CalendarMoveBackward extends StatelessWidget {
         shadows: [Shadow(color: Colors.transparent)],
       ),
       style: Theme.of(context).iconButtonTheme.style?.copyWith(
-            iconColor: MaterialStateProperty.resolveWith((states) {
-              if (!states.contains(MaterialState.disabled)) {
+            iconColor: WidgetStateProperty.resolveWith((states) {
+              if (!states.contains(WidgetState.disabled)) {
                 return Theme.of(context).colorScheme.onPrimary;
               }
               return Theme.of(context).colorScheme.onPrimary.withOpacity(0.2);
             }),
-            iconSize: const MaterialStatePropertyAll(30),
+            iconSize: const WidgetStatePropertyAll(30),
           ),
       onPressed: onPressed,
     );

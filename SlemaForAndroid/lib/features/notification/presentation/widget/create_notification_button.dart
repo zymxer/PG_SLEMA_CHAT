@@ -12,15 +12,15 @@ class CreateNotificationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ButtonStyle(
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(32.0),
           ),
         ),
-        backgroundColor: MaterialStateProperty.all<Color>(
+        backgroundColor: WidgetStateProperty.all<Color>(
           Theme.of(context).primaryColor,
         ),
-        elevation: MaterialStateProperty.all(6),
+        elevation: WidgetStateProperty.all(6),
       ),
       onPressed: () => onNotificationCreated(
         GetNotification(const Uuid().v4(), TimeOfDay.now()),

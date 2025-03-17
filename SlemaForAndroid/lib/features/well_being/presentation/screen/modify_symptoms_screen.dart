@@ -152,7 +152,7 @@ class ModifySymptomsScreenState extends State<ModifySymptomsScreen>
           content: Text(
             validationErrorMessage,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.background,
+              color: theme.colorScheme.surface,
             ),
           ),
         ),

@@ -14,15 +14,15 @@ class DefaultCircularButton extends StatelessWidget {
         child: ElevatedButton(
           onPressed: onPressed,
           style: ButtonStyle(
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(32.0),
               ),
             ),
-            backgroundColor: MaterialStateProperty.all<Color>(
+            backgroundColor: WidgetStateProperty.all<Color>(
               Theme.of(context).primaryColor,
             ),
-            elevation: MaterialStateProperty.all(6),
+            elevation: WidgetStateProperty.all(6),
           ),
           child: Padding(
             padding: const EdgeInsets.all(14.0),

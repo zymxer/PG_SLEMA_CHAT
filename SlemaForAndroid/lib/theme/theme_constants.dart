@@ -54,7 +54,7 @@ ThemeData lightTheme = ThemeData(
     ),
     iconButtonTheme: const IconButtonThemeData(
         style: ButtonStyle(
-      iconSize: MaterialStatePropertyAll(36),
+      iconSize: WidgetStatePropertyAll(36),
     )),
     appBarTheme: AppBarTheme(
       titleTextStyle: TextStyle(
@@ -91,8 +91,8 @@ ThemeData lightTheme = ThemeData(
       iconSize: 40,
     ),
     switchTheme: SwitchThemeData(
-      trackColor: MaterialStateProperty.resolveWith((states) =>
-          states.contains(MaterialState.selected)
+      trackColor: WidgetStateProperty.resolveWith((states) =>
+          states.contains(WidgetState.selected)
               ? lightColorScheme.primary
               : lightColorScheme.primaryContainer),
     ),
@@ -125,13 +125,13 @@ ThemeData lightTheme = ThemeData(
       ),
     ),
     timePickerTheme: TimePickerThemeData(
-      hourMinuteColor: MaterialStateColor.resolveWith(
-        (states) => states.contains(MaterialState.selected)
+      hourMinuteColor: WidgetStateColor.resolveWith(
+        (states) => states.contains(WidgetState.selected)
             ? lightColorScheme.primary
             : lightColorScheme.secondary,
       ),
-      hourMinuteTextColor: MaterialStateColor.resolveWith(
-        (states) => states.contains(MaterialState.selected)
+      hourMinuteTextColor: WidgetStateColor.resolveWith(
+        (states) => states.contains(WidgetState.selected)
             ? lightColorScheme.onPrimary
             : lightColorScheme.onSecondary,
       ),
@@ -142,10 +142,10 @@ ThemeData lightTheme = ThemeData(
       headerHelpStyle: const TextStyle(fontSize: 34),
       headerHeadlineStyle: const TextStyle(fontSize: 28),
       headerForegroundColor: lightColorScheme.primary,
-      yearForegroundColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.disabled)) {
+      yearForegroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) {
           return lightColorScheme.inversePrimary;
-        } else if (states.contains(MaterialState.selected)) {
+        } else if (states.contains(WidgetState.selected)) {
           return lightColorScheme.onPrimary;
         } else {
           return lightColorScheme.primary;

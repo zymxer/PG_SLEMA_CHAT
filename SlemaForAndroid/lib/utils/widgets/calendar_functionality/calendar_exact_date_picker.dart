@@ -17,7 +17,6 @@ class CalendarExactDatePicker extends StatelessWidget {
         lastDate: controller.allowedLastDate,
         initialEntryMode: DatePickerEntryMode.calendarOnly,
       );
-
       if (pickedDate != null) {
         controller.selectedDate = pickedDate;
         onDatePicked(pickedDate);
@@ -30,10 +29,10 @@ class CalendarExactDatePicker extends StatelessWidget {
     return IconButton(
       onPressed: handleDatePick(context),
       style: Theme.of(context).iconButtonTheme.style?.copyWith(
-            iconColor: MaterialStatePropertyAll(
+            iconColor: WidgetStatePropertyAll(
               Theme.of(context).colorScheme.onPrimary,
             ),
-            iconSize: const MaterialStatePropertyAll(30),
+            iconSize: const WidgetStatePropertyAll(30),
           ),
       icon: const Icon(
         Icons.calendar_month,
