@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pg_slema/features/about/presentation/screen/about_screen.dart';
-import 'package:pg_slema/features/chat/logic/service/threads/threads_service.dart';
-import 'package:pg_slema/features/chat/presentation/screen/all_threads_screen.dart';
 import 'package:pg_slema/features/diet/presentation/screen/diet_screen.dart';
 import 'package:pg_slema/features/exercises/logic/service/exercise_service.dart';
 import 'package:pg_slema/features/exercises/presentation/screen/exercises_screen.dart';
@@ -38,7 +36,6 @@ class MainScreenState extends State<MainScreen> {
         Provider.of<AssessmentsService>(context, listen: false);
     final exercisesService =
         Provider.of<ExerciseService>(context, listen: false);
-    final threadsService = Provider.of<ThreadsService>(context, listen: false);
     final imageMetadataRepository =
         Provider.of<StoredImageMetadataRepository>(context, listen: false);
     final imageService = Provider.of<ImageService>(context, listen: false);
@@ -95,9 +92,6 @@ class MainScreenState extends State<MainScreen> {
         AllAssessmentsScreen(
           service: assessmentsService,
           factory: assessmentFactory,
-        ),
-        AllThreadsScreen(
-          threadsService: threadsService,
         ),
         const SettingsScreen(),
         const AboutScreen(),

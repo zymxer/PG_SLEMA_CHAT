@@ -2,11 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:pg_slema/features/chat/logic/repository/stomp_client_factory.dart';
-import 'package:pg_slema/features/chat/logic/repository/stomp_client_factory_impl.dart';
-import 'package:pg_slema/features/chat/logic/repository/threads/threads_repository_impl.dart';
-import 'package:pg_slema/features/chat/logic/service/threads/threads_service.dart';
-import 'package:pg_slema/features/chat/logic/service/threads/threads_service_impl.dart';
 import 'package:pg_slema/features/exercises/logic/converter/exercise_to_dto_converter.dart';
 import 'package:pg_slema/features/exercises/logic/repository/shared_preferences_exercise_repository.dart';
 import 'package:pg_slema/features/exercises/logic/service/exercise_service.dart';
@@ -85,11 +80,6 @@ Future<void> main() async {
   dio.options.connectTimeout = const Duration(seconds: 5);
   dio.options.receiveTimeout = const Duration(seconds: 3);
 
-  final threadsRepository = ThreadsRepositoryImpl(dio: dio);
-  final threadsService = ThreadsServiceImpl(threadsRepository);
-  final stompClientFactory = StompClientFactoryImpl(
-    applicationInfoRepository: applicationInfoRepository,
-  );
 
   runApp(
     MultiProvider(
@@ -104,11 +94,9 @@ Future<void> main() async {
         Provider<ExerciseService>(create: (_) => exerciseService),
         Provider<ApplicationInfoRepository>(
             create: (_) => applicationInfoRepository),
-        Provider<ThreadsService>(create: (_) => threadsService),
         Provider<StoredImageMetadataRepository>(
             create: (_) => imageMetadataRepository),
         Provider<ImageService>(create: (_) => imageService),
-        Provider<StompClientFactory>(create: (_) => stompClientFactory),
         Provider<ApplicationInfoService>(create: (_) => applicationInfoService),
       ],
       child: MaterialApp(
