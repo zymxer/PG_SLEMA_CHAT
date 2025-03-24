@@ -63,6 +63,14 @@ class MainScreenState extends State<MainScreen> {
               destinationIndex: 1,
             ),
             CustomNavigationDestination(
+              icon: Icons.chat,
+              selectedIcon: Icons.chat_outlined,
+              label: 'Menu',
+              onPressed: (int lambda) => { controller.onChatsTapped(context) },
+              currentSelectedIndex: controller.currentIndex,
+              destinationIndex: -1,
+            ),
+            CustomNavigationDestination(
               icon: Icons.menu_outlined,
               selectedIcon: Icons.menu,
               label: 'Menu',

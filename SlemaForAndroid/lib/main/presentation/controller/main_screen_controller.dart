@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
-class MainScreenController extends ChangeNotifier {
+
+import 'package:pg_slema/features/chat/auth/presentation/screen/signin_screen.dart';class MainScreenController extends ChangeNotifier {
   int _currentIndex = 1;
 
   int get currentIndex => _currentIndex;
@@ -13,5 +15,14 @@ class MainScreenController extends ChangeNotifier {
 
   void onTabTapped(int index) {
     currentIndex = index;
+  }
+
+  void onChatsTapped(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SignInScreen(),
+      ),
+    );
   }
 }

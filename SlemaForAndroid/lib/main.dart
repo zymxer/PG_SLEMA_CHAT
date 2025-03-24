@@ -1,7 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:pg_slema/features/chat/user/logic/entity/user.dart';
+import 'package:pg_slema/features/chat/user/logic/service/user_service.dart';
 import 'package:pg_slema/features/exercises/logic/converter/exercise_to_dto_converter.dart';
 import 'package:pg_slema/features/exercises/logic/repository/shared_preferences_exercise_repository.dart';
 import 'package:pg_slema/features/exercises/logic/service/exercise_service.dart';
@@ -32,6 +35,11 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:loggy/loggy.dart';
 
 Future<void> main() async {
+
+  // TODO: replace with applicationInfoService
+  await dotenv.load(fileName: "assets/configs/config.dev");
+  //User.currentUser = await UserService().getCurrentUser();
+
   Loggy.initLoggy(
     logPrinter: const LoggerPrinter(),
   );
