@@ -69,3 +69,4 @@ replay_pid*
 /.vscode
 /postgres_data
 .DS_Store
+SlemaForAndroid/android/app/.cxx
