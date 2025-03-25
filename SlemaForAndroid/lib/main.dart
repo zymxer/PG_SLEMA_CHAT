@@ -36,6 +36,7 @@ import 'package:loggy/loggy.dart';
 
 Future<void> main() async {
 
+  // TODO: fix about app
   // TODO: replace with applicationInfoService
   await dotenv.load(fileName: "assets/configs/config.dev");
   //User.currentUser = await UserService().getCurrentUser();
