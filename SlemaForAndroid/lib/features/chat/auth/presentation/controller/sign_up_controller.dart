@@ -5,6 +5,5 @@ import 'package:pg_slema/features/chat/auth/presentation/screen/sign_in_screen_n
 class SignUpController {
   //TODO
 
-  // chat controller.setIndex...
 
 }

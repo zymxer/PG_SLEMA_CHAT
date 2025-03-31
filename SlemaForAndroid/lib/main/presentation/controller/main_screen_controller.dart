@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:pg_slema/features/chat/auth/presentation/screen/sign_in_screen_new.dart';
 
 
-import 'package:pg_slema/features/chat/auth/presentation/screen/signin_screen.dart';class MainScreenController extends ChangeNotifier {
+import 'package:pg_slema/features/chat/auth/presentation/screen/signin_screen.dart';
+import 'package:pg_slema/features/chat/main/presentation/screen/chat_main_screen.dart';
+
+class MainScreenController extends ChangeNotifier {
   int _currentIndex = 1;
 
   int get currentIndex => _currentIndex;
@@ -22,7 +25,7 @@ import 'package:pg_slema/features/chat/auth/presentation/screen/signin_screen.da
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SignInScreenNew(),
+        builder: (context) => ChatMainScreen(),
       ),
     );
   }

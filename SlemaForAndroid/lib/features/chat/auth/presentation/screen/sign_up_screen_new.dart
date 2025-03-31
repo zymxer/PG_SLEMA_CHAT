@@ -3,14 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_in_controller.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_up_controller.dart';
 import 'package:pg_slema/features/chat/auth/presentation/widget/auth_button.dart';
+import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_screen_controller.dart';
 import 'package:pg_slema/utils/widgets/appbars/default_appbar.dart';
 import 'package:pg_slema/utils/widgets/default_body/default_body.dart';
 import 'package:pg_slema/utils/widgets/forms/text_input.dart';
 
 class SignUpScreenNew extends StatefulWidget {
+  final ChatMainScreenController mainScreenController;
 
   const SignUpScreenNew({
-    super.key
+    super.key,
+    required this.mainScreenController
   });
   @override
   State<StatefulWidget> createState() => _SignInScreenNewState();
@@ -49,7 +52,7 @@ class _SignInScreenNewState extends State<SignUpScreenNew> {
                     onChanged: _onFieldChangedPlaceholder,
                   ),
                   const SizedBox(height: 20.0),
-                  CustomTextFormField(
+                  CustomTextFormField(  //TODO *******
                     label: "Hasło",
                     icon: Icons.password,
                     onChanged: _onFieldChangedPlaceholder,
@@ -63,12 +66,14 @@ class _SignInScreenNewState extends State<SignUpScreenNew> {
                   const SizedBox(height: 20.0),
                   AuthButton(
                     formKey: _formKey,
+                    mainScreenController: widget.mainScreenController,
                     type: AuthButtonType.SignUp,
                     isMain: true,
                     onPressed: _onButtonPressedPlaceholder,
                   ),
                   const SizedBox(height: 20.0),
                   AuthButton(
+                    mainScreenController: widget.mainScreenController,
                     type: AuthButtonType.SignIn,
                     isMain: false,
                     onPressed: _onButtonPressedPlaceholder,
