@@ -65,7 +65,7 @@ class AuthButton extends StatelessWidget {
       // TODO sign up logic
     }
     else {
-      mainScreenController.navigateTo(ChatMainScreenType.SIGN_UP_SCREEN);
+      mainScreenController.navigateTo(ChatMainScreenType.CHATS_SCREEN);
     }
 
   }

@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pg_slema/features/chat/auth/presentation/screen/sign_in_screen_new.dart';
 import 'package:pg_slema/features/chat/auth/presentation/screen/sign_up_screen_new.dart';
+import 'package:pg_slema/features/chat/chats/logic/service/chat_service.dart';
+import 'package:pg_slema/features/chat/chats/presentation/screen/chats_screen.dart';
 import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_screen_controller.dart';
-import 'package:pg_slema/features/chat/main/widget/chat_navigation_destination_widget.dart';
+import 'package:pg_slema/features/chat/main/presentation/widget/chat_navigation_destination_widget.dart';
 import 'package:provider/provider.dart';
 
 class ChatMainScreen extends StatefulWidget {
@@ -60,6 +62,7 @@ class ChatMainScreenState extends State<ChatMainScreen> {
       body: <Widget>[
         SignInScreenNew(mainScreenController: controller),
         SignUpScreenNew(mainScreenController: controller),
+        ChatsScreen(service: ChatService()) // TODO fix ChatService
 
       ][controller.currentIndex],
     );
