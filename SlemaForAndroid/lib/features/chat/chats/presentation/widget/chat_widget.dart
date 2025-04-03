@@ -26,7 +26,7 @@ class ChatWidget extends StatelessWidget {
         children: [
           Padding(
               padding: const EdgeInsets.only(right: 10.0),
-              child: Icon(
+              child: Icon(  // TODO profile pic
                 Icons.telegram,
                 color: Theme.of(context).primaryColor,
                 size: 40,
@@ -40,7 +40,7 @@ class ChatWidget extends StatelessWidget {
                     height: 32,
                     child:
                     Text(
-                      chat.name,
+                      "YYYYYYyyyyyyyyyppppppppggggg", // TODO fix view
                       style: Theme.of(context).textTheme.headlineMedium,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.left,
@@ -55,10 +55,11 @@ class ChatWidget extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                   )
-
                 ],
               )
           ),
+          //TODO unread counnter
+          //TODO pop up
         ],
       ),
     );

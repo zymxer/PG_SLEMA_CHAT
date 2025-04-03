@@ -40,6 +40,8 @@ class ChatMainScreenController extends ChangeNotifier {
         return 1;
       case ChatMainScreenType.CHATS_SCREEN:
         return 2;
+      case ChatMainScreenType.USER_SCREEN:
+        return 3;
       default:
         return 0;
     }
@@ -52,6 +54,8 @@ class ChatMainScreenController extends ChangeNotifier {
       case ChatMainScreenType.SIGN_UP_SCREEN:
         return false;
       case ChatMainScreenType.CHATS_SCREEN:
+        return true;
+      case ChatMainScreenType.USER_SCREEN:
         return true;
       default:
         return false;
