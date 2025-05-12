@@ -52,8 +52,12 @@ public class AuthController {
 
     @GetMapping("/verify")
     public ResponseEntity<?> verify(@RequestHeader("Authorization") String token){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+        System.out.println("Token: " + token);
+        if (token == null || !token.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+        token = token.substring(7); // Remove "Bearer " prefix
+        String username = jwtUtil.extractUsername(token);
         return ResponseEntity.ok(username);
     }
 }
