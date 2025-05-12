@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/chat.dart';
+import 'package:pg_slema/features/chat/chats/presentation/controller/chat_controller.dart';
+import 'package:pg_slema/features/chat/chats/presentation/screen/chat_screen.dart';
 import 'package:pg_slema/features/medicine/logic/entity/medicine.dart';
 import 'package:pg_slema/features/medicine/presentation/widget/all_medicines_screen/single_medicine_label.dart';
 import 'package:pg_slema/features/medicine/presentation/widget/all_medicines_screen/medicine_popup_menu_edit_delete_button.dart';
@@ -19,8 +21,10 @@ class ChatWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultContainer(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Row(
+      padding: const EdgeInsets.only(bottom: 20), //todo check size
+      child: ElevatedButton(  //todo кринжово выглядит фон
+          onPressed: () => _onPressed(context, chat),
+          child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -61,7 +65,18 @@ class ChatWidget extends StatelessWidget {
           //TODO unread counnter
           //TODO pop up
         ],
-      ),
+          ),
+      )
     );
   }
+
+  void _onPressed(BuildContext context, Chat chat) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ChatScreen(controller: ChatController())  //todo injected controller
+        )
+    );
+  }
+
 }

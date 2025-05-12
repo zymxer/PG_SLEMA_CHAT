@@ -11,7 +11,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async{
   await dotenv.load(fileName: ".env");
-  User.currentUser = await UserService().getCurrentUser();
+  //User.currentUser = await UserService().getCurrentUser();
   runApp(const MyApp());
 }
 
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
     final bool loggedOn = User.currentUser == null ? false : true;
     return MaterialApp(
       title: 'Flutter Demo',
-      initialRoute: loggedOn ? "/inbox" : "/signIn",
+      initialRoute: loggedOn ? "/inbox" : "/inbox",
       routes: {
         "/signIn": (context) => SignInScreen(), //todo static routes in Screen classes
         "/signUp": (context) => SignUpScreen(),

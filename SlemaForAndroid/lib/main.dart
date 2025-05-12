@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:pg_slema/features/chat/auth/presentation/controller/sign_in_controller.dart';
+import 'package:pg_slema/features/chat/auth/presentation/controller/sign_up_controller.dart';
 import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_screen_controller.dart';
 import 'package:pg_slema/features/chat/user/logic/entity/user.dart';
 import 'package:pg_slema/features/chat/user/logic/service/user_service.dart';
@@ -95,7 +97,11 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => MainScreenController()),
+
         ChangeNotifierProvider(create: (context) => ChatMainScreenController()),
+        ChangeNotifierProvider(create: (context) => SignInController()),
+        ChangeNotifierProvider(create: (context) => SignUpController()),
+
         ChangeNotifierProvider(
           create: (context) => MotivationScreenController(),
         ),

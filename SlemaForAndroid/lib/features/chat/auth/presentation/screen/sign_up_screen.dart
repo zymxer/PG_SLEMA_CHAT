@@ -8,18 +8,18 @@ import 'package:pg_slema/utils/widgets/appbars/default_appbar.dart';
 import 'package:pg_slema/utils/widgets/default_body/default_body.dart';
 import 'package:pg_slema/utils/widgets/forms/text_input.dart';
 
-class SignUpScreenNew extends StatefulWidget {
+class SignUpScreen extends StatefulWidget {
   final ChatMainScreenController mainScreenController;
 
-  const SignUpScreenNew({
+  const SignUpScreen({
     super.key,
     required this.mainScreenController
   });
   @override
-  State<StatefulWidget> createState() => _SignInScreenNewState();
+  State<StatefulWidget> createState() => _SignInScreenState();
 }
 
-class _SignInScreenNewState extends State<SignUpScreenNew> {
+class _SignInScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   final _signUpController = SignUpController();
 

@@ -33,17 +33,7 @@ class AuthService {
         final Map<String, dynamic> responseBody = jsonDecode(response.body);
         final String token = responseBody['token'];
 
-        print("-------------------------------------------------------------------------");
-        var savedToken = await TokenService.getToken();
-        var usr = await UserService().getCurrentUser();
-        print("CURRENT TOKEN: $savedToken");
-        print("CURRENT OF TOKEN: ${usr?.name ?? "NONE"}");
         await TokenService.saveToken(token);
-        savedToken = await TokenService.getToken();
-        usr = await UserService().getCurrentUser();
-        print("NEW TOKEN: $savedToken");
-        print("CURRENT OF TOKEN: ${usr?.name ?? "NONE"}");
-        print("-------------------------------------------------------------------------");
 
         return LoginStatus(true, token);
       } else {

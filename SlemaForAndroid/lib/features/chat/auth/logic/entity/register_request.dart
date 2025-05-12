@@ -8,7 +8,7 @@ class RegisterRequest {
   Map<String, String> toJson() {
     return {
       'username': username,
-      'password': password,
+      'password': password, //hash
       'email': email
     };
   }

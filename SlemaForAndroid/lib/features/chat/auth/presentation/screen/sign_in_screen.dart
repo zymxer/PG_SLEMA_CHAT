@@ -6,25 +6,23 @@ import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_sc
 import 'package:pg_slema/utils/widgets/appbars/default_appbar.dart';
 import 'package:pg_slema/utils/widgets/default_body/default_body.dart';
 import 'package:pg_slema/utils/widgets/forms/text_input.dart';
+import 'package:provider/provider.dart';
 
 // TODO: !!! Chat controller, main page - loading, controller with body of screens
 
-class SignInScreenNew extends StatefulWidget {
-  final ChatMainScreenController mainScreenController;
+class SignInScreen extends StatefulWidget {
+  final ChatMainScreenController mainScreenController;  // todo кажется надо просто провайдер в билд
 
-  const SignInScreenNew({
+  const SignInScreen({
     super.key,
     required this.mainScreenController
 });
   @override
-  State<StatefulWidget> createState() => _SignInScreenNewState();
+  State<StatefulWidget> createState() => _SignInScreenState();
 }
 
-class _SignInScreenNewState extends State<SignInScreenNew> {
+class _SignInScreenState extends State<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _signInController = SignInController();
-
-
 
   @override
   void initState() {
@@ -33,6 +31,8 @@ class _SignInScreenNewState extends State<SignInScreenNew> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Provider.of<SignInController>(context);
+
     return Column(
       children: [
         DefaultAppBar(title: "Zaloguj się"),
@@ -45,14 +45,15 @@ class _SignInScreenNewState extends State<SignInScreenNew> {
                   const SizedBox(height: 20.0),
                   CustomTextFormField(
                     label: "Nazwa użytkownika",
+                    initialValue: controller.username,
                     icon: Icons.account_box,
-                    onChanged: _onFieldChangedPlaceholder,
+                    onChanged: (value) => controller.username = value,
                   ),
                   const SizedBox(height: 20.0),
                   CustomTextFormField(
                     label: "Hasło",
                     icon: Icons.password,
-                    onChanged: _onFieldChangedPlaceholder,
+                    onChanged: (value) => controller.password = value,
                   ),
                   const SizedBox(height: 20.0),
                   AuthButton(
@@ -60,14 +61,14 @@ class _SignInScreenNewState extends State<SignInScreenNew> {
                     mainScreenController: widget.mainScreenController,
                     type: AuthButtonType.SignIn,
                     isMain: true,
-                    onPressed: _onButtonPressedPlaceholder,
+                    onPressed: controller.signIn,
                   ),
                   const SizedBox(height: 20.0),
                   AuthButton(
                     type: AuthButtonType.SignUp,
                     mainScreenController: widget.mainScreenController,
                     isMain: false,
-                    onPressed: _onButtonPressedPlaceholder,
+                    onPressed: () => {},
                   ),
                 ],
               ),
@@ -77,14 +78,4 @@ class _SignInScreenNewState extends State<SignInScreenNew> {
       ],
     );
   }
-  void _onFieldChangedPlaceholder(String name) {
-    //TODO replace
-  }
-
-  void _onButtonPressedPlaceholder() {
-    // TODO replace
-  }
-
-
-
 }

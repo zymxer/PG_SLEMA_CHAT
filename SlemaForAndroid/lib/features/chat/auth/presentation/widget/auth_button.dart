@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:pg_slema/features/chat/auth/presentation/screen/sign_up_screen_new.dart';
+import 'package:pg_slema/features/chat/auth/presentation/screen/sign_up_screen.dart';
 import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_screen_controller.dart';
 import 'package:pg_slema/utils/widgets/default_circular_button.dart';
 
@@ -14,13 +14,13 @@ class AuthButton extends StatelessWidget {
   final ChatMainScreenController mainScreenController;
   final AuthButtonType type;
   final bool isMain;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   // Todo final
   late String label;
 
   AuthButton({super.key, required this.mainScreenController, this.formKey,
-    required this.type, required this.isMain, required this.onPressed}) : super() {
+    required this.type, required this.isMain, this.onPressed}) : super() {
     label = _labelFromType();
   }
 
@@ -42,7 +42,9 @@ class AuthButton extends StatelessWidget {
   }
 
   void Function() _onPressedFromType(BuildContext context) {
-    onPressed();
+    if(onPressed != null) {
+      onPressed!();
+    }
     switch (type) {
       case AuthButtonType.SignIn:
         return () => _onSignInButtonPressed(context);

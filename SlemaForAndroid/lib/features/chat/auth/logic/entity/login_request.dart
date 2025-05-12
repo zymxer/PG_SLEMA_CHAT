@@ -7,7 +7,7 @@ class LoginRequest {
   Map<String, String> toJson() {
     return {
       'username': username,
-      'password': password,
+      'password': password, // hash
     };
   }
 }
