@@ -13,8 +13,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
-// TODO rewrite this class to get real request user
-
 @Service
 public class UserService {
 
@@ -49,7 +47,6 @@ public class UserService {
         return userRepository.findByUsername(username).get();
     }
 
-    //todo sort
     public List<User> getAllUsers() { return userRepository.findAll(); }
 
 
