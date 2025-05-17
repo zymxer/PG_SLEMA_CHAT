@@ -23,13 +23,13 @@ public class MessageService {
         this.messageRepository = messageRepository;
     }
 
-    public void sendMessage(UUID chatId, String message, String authorizationHeader) {
+    public Message sendMessage(UUID chatId, String message, String authorizationHeader) {
         User requestUser = userService.getRequestUser(authorizationHeader);
         Chat chat = chatService.getChat(chatId);
         Message newMessage = Message.builder().chat(chat).sender(requestUser).content(message)
                 .timestamp(LocalDateTime.now()).isRead(false).build();
 
-        messageRepository.save(newMessage);
+       return messageRepository.save(newMessage);
     }
 
     public List<Message> getAllMessages(UUID chatId) {

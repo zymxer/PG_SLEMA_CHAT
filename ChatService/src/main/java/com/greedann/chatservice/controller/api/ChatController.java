@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.greedann.chatservice.dto.CreateOrUpdateChat;
 import com.greedann.chatservice.model.Chat;
@@ -20,6 +21,6 @@ public interface ChatController {
     public ResponseEntity<List<Chat>> getAllChats(@RequestHeader("Authorization") String authorizationHeader);
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteChat(@PathVariable Long id, @RequestHeader("Authorization") String authorizationHeader);
+    public ResponseEntity<Void> deleteChat(@PathVariable UUID id, @RequestHeader("Authorization") String authorizationHeader);
 
 }

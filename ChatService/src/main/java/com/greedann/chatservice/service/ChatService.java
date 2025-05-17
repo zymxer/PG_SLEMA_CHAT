@@ -2,6 +2,7 @@ package com.greedann.chatservice.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.ArrayList;
 
@@ -11,6 +12,8 @@ import com.greedann.chatservice.dto.CreateOrUpdateChat;
 import com.greedann.chatservice.model.Chat;
 import com.greedann.chatservice.model.ChatMember;
 import com.greedann.chatservice.model.User;
+import com.greedann.chatservice.exception.ResourceNotFoundException;
+import com.greedann.chatservice.exception.AuthenticationException;
 
 import com.greedann.chatservice.repository.ChatRepository;
 import com.greedann.chatservice.repository.ChatMemberRepository;
@@ -35,34 +38,38 @@ public class ChatService {
         String interlocutorUsername = chat.getInterlocutorUsername();
         if (isGroup) {
             Chat newChat = Chat.builder().name(chatName).isGroup(true).createdAt(LocalDateTime.now()).build();
+            Chat savedChat = chatRepository.save(newChat);
             User requestUser = userService.getRequestUser(authorizationHeader);
-            ChatMember chatMember = ChatMember.builder().chat(newChat).user(requestUser).role("creator")
+            ChatMember chatMember = ChatMember.builder().chat(savedChat).user(requestUser).role("creator")
                     .joinedAt(LocalDateTime.now()).build();
-            chatRepository.save(newChat);
             chatMemberRepository.save(chatMember);
             return newChat;
         } else {
             Chat newChat = Chat.builder().name(chatName).isGroup(false).createdAt(LocalDateTime.now()).build();
-            User interlocutor = userService.getUser(interlocutorUsername);
-            // TODO: return error if interlocutor is null
-            User requestUser = userService.getRequestUser(authorizationHeader);
-            // Add interlocutorUuid and requestUserUuid to newChat
-            ChatMember chatMember1 = ChatMember.builder().chat(newChat).user(interlocutor).role("interlocutor")
-                    .joinedAt(LocalDateTime.now()).build();
-            ChatMember chatMember2 = ChatMember.builder().chat(newChat).user(requestUser).role("creator")
-                    .joinedAt(LocalDateTime.now()).build();
-            chatRepository.save(newChat);
-            chatMemberRepository.save(chatMember1);
-            chatMemberRepository.save(chatMember2);
+            try {
+                User interlocutor = userService.getUser(interlocutorUsername);
+                User requestUser = userService.getRequestUser(authorizationHeader);
+                if(interlocutor.equals(requestUser)) {
+                    throw new ResourceNotFoundException("You can't add yourself to this chat, because you are already interlocutor");
+                }
+                ChatMember chatMember1 = ChatMember.builder().chat(newChat).user(interlocutor).role("interlocutor")
+                        .joinedAt(LocalDateTime.now()).build();
+                ChatMember chatMember2 = ChatMember.builder().chat(newChat).user(requestUser).role("creator")
+                        .joinedAt(LocalDateTime.now()).build();
+                chatRepository.save(newChat);
+                chatMemberRepository.save(chatMember1);
+                chatMemberRepository.save(chatMember2);
+            }
+            catch (NoSuchElementException e) {
+                throw new ResourceNotFoundException("Contact not found: " + interlocutorUsername); //change exception
+            }
             return newChat;
         }
     }
 
     public List<Chat> getAllChats(String authorizationHeader) {
         User requestUser = userService.getRequestUser(authorizationHeader);
-        // ret all ChatMembers where user = requestUser
         List<ChatMember> chatMembers = chatMemberRepository.findAllByUser(requestUser);
-        // ret all Chats where chatMembers contains chat
         List<Chat> chats = new ArrayList<>();
         for (ChatMember chatMember : chatMembers) {
             chats.add(chatMember.getChat());
@@ -71,7 +78,28 @@ public class ChatService {
     }
 
     public Chat getChat(UUID id) {
-        return chatRepository.findById(id).orElse(null);
+        return chatRepository.findById(id).orElseThrow(() -> 
+            new ResourceNotFoundException("Chat " + id + " not found")
+        );
     }
 
+    public void deleteChat(UUID id, String authorizationHeader) {
+        User requestUser = userService.getRequestUser(authorizationHeader);
+        Chat chat = chatRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Chat " + id + " not found"));
+        
+        ChatMember chatMember = chatMemberRepository.findByChatAndUser(chat, requestUser)
+            .orElseThrow(() -> new AuthenticationException("You do not have permission to delete this chat"));
+        
+        if (!"creator".equals(chatMember.getRole())) {
+            throw new AuthenticationException("Only creators can delete this chat");
+        }
+
+        // Not good but mne vpadlu perepisywat' model chat & chatMember
+        List<ChatMember> chatMembers = chatMemberRepository.findAllByChat(chat);
+        chatMemberRepository.deleteAll(chatMembers);
+
+    
+        chatRepository.delete(chat);
+    }
 }

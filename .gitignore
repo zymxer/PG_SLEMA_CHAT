@@ -70,3 +70,4 @@ replay_pid*
 /postgres_data
 .DS_Store
 SlemaForAndroid/android/app/.cxx
+/docker-compose/postgres_data

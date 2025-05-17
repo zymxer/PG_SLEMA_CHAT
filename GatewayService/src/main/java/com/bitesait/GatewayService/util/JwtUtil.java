@@ -18,6 +18,12 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long jwtExpiration;
 
+    private String lastErrorMessage;
+
+    public String getLastErrorMessage() {
+        return lastErrorMessage;
+    }
+
     public String generateToken(User user){
         return Jwts.builder()
                 .setSubject(user.getUsername())
@@ -36,8 +42,8 @@ public class JwtUtil {
                 .getBody()
                 .getSubject();
     }
-    public boolean validateToken(String token){
-        try{
+    public boolean validateToken(String token) {
+        try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(jwtSecret)
                     .build()
@@ -47,21 +53,21 @@ public class JwtUtil {
             Date expiration = claims.getExpiration();
             System.out.println(expiration);
             if (expiration.before(new Date())) {
-                return false; // Token is expired
+                lastErrorMessage = "Token is expired";
+                return false;
             }
             return true;
         } catch (ExpiredJwtException e) {
-            System.out.println("Token is expired: " + e.getMessage());
+            lastErrorMessage = "Token is expired: " + e.getMessage();
             return false;
         } catch (MalformedJwtException e) {
-            System.out.println("Malformed token: " + e.getMessage());
+            lastErrorMessage = "Malformed token: " + e.getMessage();
             return false;
         } catch (IllegalArgumentException e) {
-            System.out.println("Illegal argument: " + e.getMessage());
+            lastErrorMessage = "Illegal argument: " + e.getMessage();
             return false;
         } catch (JwtException e) {
-            // Catch all other JWT exceptions (parse exceptions, etc.)
-            System.out.println("Invalid JWT token: " + e.getMessage());
+            lastErrorMessage = "Invalid JWT token: " + e.getMessage();
             return false;
         }
     }

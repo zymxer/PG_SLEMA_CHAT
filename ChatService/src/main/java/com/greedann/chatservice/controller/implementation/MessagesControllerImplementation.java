@@ -25,11 +25,9 @@ public class MessagesControllerImplementation implements MessagesController {
     }
 
     @Override
-    public ResponseEntity<Void> addMessage(UUID chatId, SendedMessage message, @RequestHeader("Authorization") String authorizationHeader) {
-
-        //todo return message id
-        messageService.sendMessage(chatId, message.getText(), authorizationHeader);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> addMessage(UUID chatId, SendedMessage message, @RequestHeader("Authorization") String authorizationHeader) {
+        Message newMessage = messageService.sendMessage(chatId, message.getText(), authorizationHeader);
+        return ResponseEntity.ok().body(newMessage.getId());
     }
 
     @Override

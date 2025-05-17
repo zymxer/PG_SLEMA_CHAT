@@ -26,7 +26,7 @@ public class ChatMember {
         }
     }
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat;
 

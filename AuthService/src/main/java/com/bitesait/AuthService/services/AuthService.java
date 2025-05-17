@@ -1,6 +1,9 @@
 package com.bitesait.AuthService.services;
 
 import com.bitesait.AuthService.DTO.RegisterRequest;
+import com.bitesait.AuthService.exceptions.EmailAlreadyExistsException;
+import com.bitesait.AuthService.exceptions.InvalidPasswordException;
+import com.bitesait.AuthService.exceptions.UsernameAlreadyExistsException;
 import com.bitesait.AuthService.models.User;
 import com.bitesait.AuthService.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +22,17 @@ public class AuthService {
 
 
     public User register(RegisterRequest request){
+
         if(userRepository.findByUsername(request.getUsername()).isPresent()){
-            throw new IllegalArgumentException("Username already exists");
+            throw new UsernameAlreadyExistsException(request.getUsername());
         }
         if(userRepository.findByEmail(request.getEmail()).isPresent()){
-            throw  new IllegalArgumentException("Email already exists");
+            throw new EmailAlreadyExistsException(request.getEmail());
         }
-        // TODO: return errors in response not in logs
+        if(request.getPassword() == null || request.getPassword().length() < 6){
+            throw new InvalidPasswordException("Password must be at least 6 characters");
+        }
+
 
        User user = User.builder()
                        .username(request.getUsername())

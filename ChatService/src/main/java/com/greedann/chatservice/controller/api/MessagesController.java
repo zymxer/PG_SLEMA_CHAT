@@ -15,8 +15,7 @@ import com.greedann.chatservice.model.Message;
 public interface MessagesController {
 
     @PostMapping
-    public ResponseEntity<Void> addMessage(@PathVariable UUID chatId, @RequestBody SendedMessage message, @RequestHeader("Authorization") String authorizationHeader);
-
+    public ResponseEntity<?> addMessage(@PathVariable UUID chatId, @RequestBody SendedMessage message, @RequestHeader("Authorization") String authorizationHeader);
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<MessageDto>> getAllMessages(@PathVariable UUID chatId, @RequestHeader("Authorization") String authorizationHeader);
