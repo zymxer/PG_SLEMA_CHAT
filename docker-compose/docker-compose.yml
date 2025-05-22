@@ -17,8 +17,8 @@ services:
     networks:
       - custom-network
   auth-service:
-    image: auth-service:1.0
-    build: ./AuthService
+    image:  aliaksandrshydlouski/slema-auth-service:0.01
+#    build: ./AuthService
     ports:
       - "8081:8081"
     environment:
@@ -28,15 +28,15 @@ services:
     networks:
       - custom-network
   gateway-service:
-    image: gateway-service:1.0
-    build: ./GatewayService
+    image: aliaksandrshydlouski/slema-gateway-service:0.01
+#    build: ./GatewayService
     ports:
       - "8080:8080"
     networks:
       - custom-network
   chat-service:
-    image: chat-service:1.0
-    build: ./ChatService
+    image: aliaksandrshydlouski/slema-chat-service:0.01
+#    build: ./ChatService
     ports:
       - "8082:8082"
     environment:
