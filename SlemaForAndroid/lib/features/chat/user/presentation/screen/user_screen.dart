@@ -9,13 +9,13 @@ import 'package:pg_slema/utils/widgets/appbars/default_appbar.dart';
 import 'package:pg_slema/utils/widgets/appbars/white_app_bar.dart';
 import 'package:pg_slema/utils/widgets/default_body/default_body.dart';
 import 'package:pg_slema/utils/widgets/forms/text_input.dart';
+import 'package:provider/provider.dart';
 
 class UserScreen extends StatefulWidget {
-  final ChatMainScreenController mainScreenController;
+
 
   const UserScreen({
     super.key,
-    required this.mainScreenController
   });
   @override
   State<StatefulWidget> createState() => _UserScreenState();
@@ -23,7 +23,6 @@ class UserScreen extends StatefulWidget {
 
 class _UserScreenState extends State<UserScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _signUpController = SignUpController();
 
   @override
   void initState() {
@@ -32,6 +31,8 @@ class _UserScreenState extends State<UserScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mainScreenController = Provider.of<ChatMainScreenController>(context);
+
     return Column(
       children: [
         const WhiteAppBar(titleText: "Profil użytkownika"),

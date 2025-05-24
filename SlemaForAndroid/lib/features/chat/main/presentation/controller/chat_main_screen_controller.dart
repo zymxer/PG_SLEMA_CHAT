@@ -1,16 +1,18 @@
 
 import 'package:flutter/cupertino.dart';
+import 'package:pg_slema/utils/token/token_service.dart';
 
 enum ChatMainScreenType {
   SIGN_IN_SCREEN,
   SIGN_UP_SCREEN,
   MAIN_LOADING_SCREEN,
   CHATS_SCREEN,
-  USER_SCREEN
+  USER_SCREEN,
+
 }
 
 class ChatMainScreenController extends ChangeNotifier {
-  int _currentIndex = 0;
+  int _currentIndex = 4;
   bool _hasBottomBar = false;
 
   int get currentIndex => _currentIndex;
@@ -42,6 +44,8 @@ class ChatMainScreenController extends ChangeNotifier {
         return 2;
       case ChatMainScreenType.USER_SCREEN:
         return 3;
+      case ChatMainScreenType.MAIN_LOADING_SCREEN:
+        return 4;
       default:
         return 0;
     }
@@ -57,10 +61,14 @@ class ChatMainScreenController extends ChangeNotifier {
         return true;
       case ChatMainScreenType.USER_SCREEN:
         return true;
+      case ChatMainScreenType.MAIN_LOADING_SCREEN:
+        return false;
       default:
         return false;
     }
   }
+
+
 
 
 

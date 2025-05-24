@@ -8,14 +8,11 @@ import 'package:pg_slema/utils/widgets/default_body/default_body.dart';
 import 'package:pg_slema/utils/widgets/forms/text_input.dart';
 import 'package:provider/provider.dart';
 
-// TODO: !!! Chat controller, main page - loading, controller with body of screens
 
 class SignInScreen extends StatefulWidget {
-  final ChatMainScreenController mainScreenController;  // todo кажется надо просто провайдер в билд
 
   const SignInScreen({
     super.key,
-    required this.mainScreenController
 });
   @override
   State<StatefulWidget> createState() => _SignInScreenState();
@@ -31,6 +28,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mainScreenController = Provider.of<ChatMainScreenController>(context);
     final controller = Provider.of<SignInController>(context);
 
     return Column(
@@ -58,17 +56,15 @@ class _SignInScreenState extends State<SignInScreen> {
                   const SizedBox(height: 20.0),
                   AuthButton(
                     formKey: _formKey,
-                    mainScreenController: widget.mainScreenController,
+                    mainScreenController: mainScreenController,
                     type: AuthButtonType.SignIn,
                     isMain: true,
-                    onPressed: controller.signIn,
                   ),
                   const SizedBox(height: 20.0),
                   AuthButton(
                     type: AuthButtonType.SignUp,
-                    mainScreenController: widget.mainScreenController,
+                    mainScreenController: mainScreenController,
                     isMain: false,
-                    onPressed: () => {},
                   ),
                 ],
               ),

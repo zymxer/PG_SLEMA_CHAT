@@ -7,13 +7,13 @@ import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_sc
 import 'package:pg_slema/utils/widgets/appbars/default_appbar.dart';
 import 'package:pg_slema/utils/widgets/default_body/default_body.dart';
 import 'package:pg_slema/utils/widgets/forms/text_input.dart';
+import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
-  final ChatMainScreenController mainScreenController;
+
 
   const SignUpScreen({
     super.key,
-    required this.mainScreenController
   });
   @override
   State<StatefulWidget> createState() => _SignInScreenState();
@@ -21,7 +21,6 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _signUpController = SignUpController();
 
   @override
   void initState() {
@@ -30,6 +29,9 @@ class _SignInScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final signUpController = Provider.of<SignUpController>(context);
+    final mainScreenController = Provider.of<ChatMainScreenController>(context);
+
     return Column(
       children: [
         DefaultAppBar(title: "Zarejestruj się"),
@@ -43,40 +45,38 @@ class _SignInScreenState extends State<SignUpScreen> {
                   CustomTextFormField(
                     label: "Nazwa użytkownika",
                     icon: Icons.account_box,
-                    onChanged: _onFieldChangedPlaceholder,
+                    onChanged: (value) => signUpController.username = value,
                   ),
                   const SizedBox(height: 20.0),
                   CustomTextFormField(
                     label: "Email",
                     icon: Icons.email,
-                    onChanged: _onFieldChangedPlaceholder,
+                    onChanged: (value) => signUpController.email = value,
                   ),
                   const SizedBox(height: 20.0),
                   CustomTextFormField(  //TODO *******
                     label: "Hasło",
                     icon: Icons.password,
-                    onChanged: _onFieldChangedPlaceholder,
+                    onChanged: (value) => signUpController.password = value,
                   ),
                   const SizedBox(height: 20.0),
                   CustomTextFormField(
                     label: "Powtórz hasło",
                     icon: Icons.password,
-                    onChanged: _onFieldChangedPlaceholder,
+                    onChanged: (value) => signUpController.password = value,
                   ),
                   const SizedBox(height: 20.0),
                   AuthButton(
                     formKey: _formKey,
-                    mainScreenController: widget.mainScreenController,
+                    mainScreenController: mainScreenController,
                     type: AuthButtonType.SignUp,
-                    isMain: true,
-                    onPressed: _onButtonPressedPlaceholder,
+                    isMain: false,
                   ),
                   const SizedBox(height: 20.0),
                   AuthButton(
-                    mainScreenController: widget.mainScreenController,
+                    mainScreenController: mainScreenController,
                     type: AuthButtonType.SignIn,
                     isMain: false,
-                    onPressed: _onButtonPressedPlaceholder,
                   ),
                 ],
               ),
@@ -86,12 +86,4 @@ class _SignInScreenState extends State<SignUpScreen> {
       ],
     );
   }
-  void _onFieldChangedPlaceholder(String name) {
-    //TODO replace
-  }
-
-  void _onButtonPressedPlaceholder() {
-    // TODO replace
-  }
-
 }

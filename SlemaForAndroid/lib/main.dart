@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:pg_slema/features/chat/auth/logic/service/auth_service.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_in_controller.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_up_controller.dart';
 import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_screen_controller.dart';
@@ -32,6 +33,7 @@ import 'package:pg_slema/main/presentation/screen/main_screen.dart';
 import 'package:pg_slema/theme/theme_constants.dart';
 import 'package:pg_slema/utils/log/logger_mixin.dart';
 import 'package:pg_slema/utils/log/logger_printer.dart';
+import 'package:pg_slema/utils/token/token_service.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -79,8 +81,15 @@ Future<void> main() async {
 
   // TODO: The address is only set at the start...
 
+  final String devAddress = "127.0.0.1";
+  final String prodAddress = "127.0.0.1"; // TODO change production address
+
   final logger = Loggy<Logger>("main");
   final dio = Dio();
+  applicationInfoRepository.setDeveloperMode(true);
+  applicationInfoRepository.setServerAddress(
+      applicationInfoRepository.isDeveloperMode()? devAddress : prodAddress
+  );
   final address = applicationInfoRepository.getServerAddress();
   final httpAddress = "http://$address";
   try {
@@ -92,15 +101,18 @@ Future<void> main() async {
   dio.options.connectTimeout = const Duration(seconds: 5);
   dio.options.receiveTimeout = const Duration(seconds: 3);
 
+  // CHAT SERVICES
+  final tokenService = TokenService();
+  final authService = AuthService(applicationInfoRepository, dio, tokenService);
+  final userService = UserService(dio, tokenService);
+
+  // CHAT CONTROLLERS
+  final chatMainScreenController = ChatMainScreenController();
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => MainScreenController()),
-
-        ChangeNotifierProvider(create: (context) => ChatMainScreenController()),
-        ChangeNotifierProvider(create: (context) => SignInController()),
-        ChangeNotifierProvider(create: (context) => SignUpController()),
 
         ChangeNotifierProvider(
           create: (context) => MotivationScreenController(),
@@ -115,6 +127,21 @@ Future<void> main() async {
             create: (_) => imageMetadataRepository),
         Provider<ImageService>(create: (_) => imageService),
         Provider<ApplicationInfoService>(create: (_) => applicationInfoService),
+
+        // CHAT SERVICES
+        Provider<AuthService>(create: (_) => authService),
+        Provider<UserService>(create: (_) => userService),
+        Provider<TokenService>(create: (_) => tokenService),
+
+        // CHAT CONTROLLERS
+        ChangeNotifierProvider(create: (context) => chatMainScreenController),
+        ChangeNotifierProvider(create: (context) => SignInController(
+          authService, chatMainScreenController
+        )),
+        ChangeNotifierProvider(create: (context) => SignUpController(
+          authService
+        )),
+
       ],
       child: MaterialApp(
         theme: lightTheme,

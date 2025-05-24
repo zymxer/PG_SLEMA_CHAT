@@ -1,8 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pg_slema/features/chat/auth/logic/service/auth_service.dart';
+import 'package:pg_slema/features/chat/auth/presentation/controller/sign_in_controller.dart';
+import 'package:pg_slema/features/chat/auth/presentation/controller/sign_up_controller.dart';
 import 'package:pg_slema/features/chat/auth/presentation/screen/sign_up_screen.dart';
 import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_screen_controller.dart';
 import 'package:pg_slema/utils/widgets/default_circular_button.dart';
+import 'package:provider/provider.dart';
 
 enum AuthButtonType {
   SignIn,
@@ -16,18 +20,18 @@ class AuthButton extends StatelessWidget {
   final bool isMain;
   final VoidCallback? onPressed;
 
-  // Todo final
   late String label;
 
   AuthButton({super.key, required this.mainScreenController, this.formKey,
     required this.type, required this.isMain, this.onPressed}) : super() {
     label = _labelFromType();
+
   }
 
   @override
   Widget build(BuildContext context) {
     return DefaultCircularButton(
-        onPressed: _onPressedFromType(context),
+        onPressed: _onPressed(context),
         label: label
     );
   }
@@ -41,10 +45,10 @@ class AuthButton extends StatelessWidget {
     }
   }
 
-  void Function() _onPressedFromType(BuildContext context) {
-    if(onPressed != null) {
-      onPressed!();
-    }
+  void Function() _onPressed(BuildContext context) {
+    // if(onPressed != null) {
+    //   onPressed!; // todo validate form
+    // }
     switch (type) {
       case AuthButtonType.SignIn:
         return () => _onSignInButtonPressed(context);
@@ -55,7 +59,7 @@ class AuthButton extends StatelessWidget {
 
   void _onSignInButtonPressed(BuildContext context) {
     if(isMain) {
-      // TODO sign in logic
+      Provider.of<SignInController>(context, listen: false).logIn();
     }
     else {
       mainScreenController.navigateTo(ChatMainScreenType.SIGN_IN_SCREEN);
@@ -64,13 +68,11 @@ class AuthButton extends StatelessWidget {
 
   void _onSignUpButtonPressed(BuildContext context) {
     if(isMain) {
-      // TODO sign up logic
+      Provider.of<SignUpController>(context, listen: false).register();
     }
     else {
-      mainScreenController.navigateTo(ChatMainScreenType.CHATS_SCREEN);
+      mainScreenController.navigateTo(ChatMainScreenType.SIGN_UP_SCREEN);
     }
 
   }
-
-
 }

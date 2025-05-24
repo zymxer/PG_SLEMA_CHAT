@@ -1,71 +1,75 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:pg_slema/features/chat/auth/logic/entity/login_request.dart';
 import 'package:pg_slema/features/chat/auth/logic/entity/login_status.dart';
 import 'package:pg_slema/features/chat/auth/logic/entity/register_request.dart';
+import 'package:pg_slema/features/chat/auth/logic/entity/register_status.dart';
 import 'package:pg_slema/features/chat/user/logic/service/user_service.dart';
+import 'package:pg_slema/features/settings/logic/application_info_repository.dart';
 import 'package:pg_slema/utils/token/token_service.dart';
 
 class AuthService {
+  final ApplicationInfoRepository applicationInfoRepository;
+  final TokenService tokenService;
+  final Dio dio;
   late String _baseUrl;
 
-  AuthService() {
-    String apiPath = dotenv.env['API_PATH'] ?? "http://localhost:8080";
-    _baseUrl = '$apiPath/auth';
+  AuthService(this.applicationInfoRepository, this.dio, this.tokenService) {
+    _baseUrl = '/auth';
   }
 
-  // Login
   Future<LoginStatus> loginUser(String username, String password) async {
-    final String url = "$_baseUrl/login";
 
+    final String endpoint = "$_baseUrl/login";
     final LoginRequest request = LoginRequest(username, password);
 
     try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(request.toJson()),
+      final response = await dio.post(
+        endpoint,
+        data: request.toJson(),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
       );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseBody = jsonDecode(response.body);
-        final String token = responseBody['token'];
-
-        await TokenService.saveToken(token);
-
-        return LoginStatus(true, token);
-      } else {
-        throw Exception('Failed to login. Status code: ${response.statusCode}');
+      switch(response.statusCode) {
+        case 200:
+          final data = response.data as Map<String, dynamic>;
+          final String token = data['token'];
+          await tokenService.saveToken(token);
+          return LoginStatus(true, token);
+        default:
+          throw Exception('Failed to log in. Status code: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Error during login: $e');
     }
   }
 
-  // todo RegisterStatus
-  Future<bool> registerUser(String username, String password,
+  Future<RegisterStatus> registerUser(String username, String password,
       String email) async {
-    final String url = "$_baseUrl/register";
 
+    final String endpoint = "$_baseUrl/register";
     final RegisterRequest request = RegisterRequest(username, password, email);
 
     try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(request.toJson()),
+      final response = await dio.post(
+        endpoint,
+        data: request.toJson(),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
       );
-
-      if (response.statusCode == 201) {
-        return true;
-      } else {
-        throw Exception(
-            'Failed to sign up. Status code: ${response.statusCode}');
+      switch(response.statusCode) {
+        case 200:
+          return RegisterStatus(true);
+        default:
+          throw Exception('Failed to register. Status code: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Error during sign up: $e');
+      throw Exception('Error during registration: $e');
     }
   }
 }

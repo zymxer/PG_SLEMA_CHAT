@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pg_slema/features/settings/logic/application_info_repository.dart';
 import 'package:pg_slema/utils/connector/shared_preferences_connector.dart';
