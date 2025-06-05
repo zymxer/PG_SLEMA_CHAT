@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:pg_slema/features/chat/user/logic/entity/user.dart';
@@ -25,7 +26,7 @@ class UserService {
     }
 
     try {
-      final response = await dio.post(
+      final response = await dio.get(
         endpoint,
         options: Options(
           headers: {
@@ -58,7 +59,7 @@ class UserService {
     }
 
     try {
-      final response = await dio.post(
+      final response = await dio.get(
         endpoint,
         options: Options(
           headers: {

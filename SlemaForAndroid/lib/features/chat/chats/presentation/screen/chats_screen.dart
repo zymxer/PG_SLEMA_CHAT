@@ -6,14 +6,12 @@ import 'package:pg_slema/features/chat/chats/presentation/screen/add_chat_screen
 import 'package:pg_slema/features/chat/chats/presentation/widget/chat_widget.dart';
 import 'package:pg_slema/utils/widgets/default_body/default_body_with_floating_action_button.dart';
 import 'package:pg_slema/utils/widgets/appbars/white_app_bar.dart';
+import 'package:provider/provider.dart';
 
 class ChatsScreen extends StatefulWidget {
 
-  final ChatService service;
-
   const ChatsScreen({
     super.key,
-    required this.service,
   });
 
   @override
@@ -21,34 +19,56 @@ class ChatsScreen extends StatefulWidget {
 }
 
 class ChatsScreenState extends State<ChatsScreen> {
-  late AllChatsController _controller;
+
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AllChatsController(
-      service: widget.service,
-    );
-
     //_controller.fetchChats
   }
 
   @override
   Widget build(BuildContext context) {
+    final chatService = Provider.of<ChatService>(context, listen: true);
     return Column(children: [
       const WhiteAppBar(titleText: "Wiadomości"),
       DefaultBodyWithFloatingActionButton(
-        onFloatingButtonPressed: _openAddExerciseScreen,
-        child: ListView.builder(
-          //itemCount: _controller.chats.length,
-          itemCount: 15,
-          padding: EdgeInsets.zero,
-          itemBuilder: (context, index) {
-            return ChatWidget(
-              chat: Chat("id", "Chat name"),
-            );
-          },
+        onFloatingButtonPressed: _openAddExerciseScreen,  // TODO
+        child: Column(
+            children: [
+              FutureBuilder<List<Chat>>(  // TODO init chatService data
+                  future: _initialized? chatService.getAllChats() : Future.value([]),
+                  builder: (context, snapshot) {
+                    if(snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if(snapshot.hasError) {
+                      print("Error while fetching initial chats");
+                      return const SizedBox.shrink();
+                    }
+                    _initialized = true;
+                    return const SizedBox.shrink();
+                  }
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: chatService.chats.length,
+                  itemBuilder: (context, index) => ChatWidget(chatService.chats[index]),
+                  ),
+                ),
+            ]
         ),
+        // child: ListView.builder(
+        //   //itemCount: _controller.chats.length,
+        //   itemCount: 15,
+        //   padding: EdgeInsets.zero,
+        //   itemBuilder: (context, index) {
+        //     return ChatWidget(
+        //       chat: Chat("id", "Chat name"),
+        //     );
+        //   },
+        // ),
       ),
     ]);
   }

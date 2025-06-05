@@ -70,7 +70,7 @@ class _SignInScreenState extends State<SignUpScreen> {
                     formKey: _formKey,
                     mainScreenController: mainScreenController,
                     type: AuthButtonType.SignUp,
-                    isMain: false,
+                    isMain: true,
                   ),
                   const SizedBox(height: 20.0),
                   AuthButton(

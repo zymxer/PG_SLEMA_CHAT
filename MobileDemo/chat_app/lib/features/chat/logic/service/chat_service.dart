@@ -54,7 +54,7 @@ class ChatService {
     final String url = _baseUrl;
 
     try {
-      print("-----------------------------------------");
+
       final token = await TokenService.getToken();
       print(token);
       final response = await http.post(
