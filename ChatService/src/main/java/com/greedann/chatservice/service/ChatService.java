@@ -17,7 +17,6 @@ import com.greedann.chatservice.exception.AuthenticationException;
 
 import com.greedann.chatservice.repository.ChatRepository;
 import com.greedann.chatservice.repository.ChatMemberRepository;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 @Service
 public class ChatService {
@@ -49,8 +48,9 @@ public class ChatService {
             try {
                 User interlocutor = userService.getUser(interlocutorUsername);
                 User requestUser = userService.getRequestUser(authorizationHeader);
-                if(interlocutor.equals(requestUser)) {
-                    throw new ResourceNotFoundException("You can't add yourself to this chat, because you are already interlocutor");
+                if (interlocutor.equals(requestUser)) {
+                    throw new ResourceNotFoundException(
+                            "You can't add yourself to this chat, because you are already interlocutor");
                 }
                 ChatMember chatMember1 = ChatMember.builder().chat(newChat).user(interlocutor).role("interlocutor")
                         .joinedAt(LocalDateTime.now()).build();
@@ -59,9 +59,8 @@ public class ChatService {
                 chatRepository.save(newChat);
                 chatMemberRepository.save(chatMember1);
                 chatMemberRepository.save(chatMember2);
-            }
-            catch (NoSuchElementException e) {
-                throw new ResourceNotFoundException("Contact not found: " + interlocutorUsername); //change exception
+            } catch (NoSuchElementException e) {
+                throw new ResourceNotFoundException("Contact not found: " + interlocutorUsername); // change exception
             }
             return newChat;
         }
@@ -78,19 +77,18 @@ public class ChatService {
     }
 
     public Chat getChat(UUID id) {
-        return chatRepository.findById(id).orElseThrow(() -> 
-            new ResourceNotFoundException("Chat " + id + " not found")
-        );
+        return chatRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Chat " + id + " not found"));
     }
 
     public void deleteChat(UUID id, String authorizationHeader) {
         User requestUser = userService.getRequestUser(authorizationHeader);
         Chat chat = chatRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Chat " + id + " not found"));
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Chat " + id + " not found"));
+
         ChatMember chatMember = chatMemberRepository.findByChatAndUser(chat, requestUser)
-            .orElseThrow(() -> new AuthenticationException("You do not have permission to delete this chat"));
-        
+                .orElseThrow(() -> new AuthenticationException("You do not have permission to delete this chat"));
+
         if (!"creator".equals(chatMember.getRole())) {
             throw new AuthenticationException("Only creators can delete this chat");
         }
@@ -99,7 +97,68 @@ public class ChatService {
         List<ChatMember> chatMembers = chatMemberRepository.findAllByChat(chat);
         chatMemberRepository.deleteAll(chatMembers);
 
-    
         chatRepository.delete(chat);
+    }
+
+    public List<Chat> getAllChatsForUser(String username) {
+        User user = userService.getUser(username);
+        List<ChatMember> chatMembers = chatMemberRepository.findAllByUser(user);
+        List<Chat> chats = new ArrayList<>();
+        for (ChatMember chatMember : chatMembers) {
+            chats.add(chatMember.getChat());
+        }
+        return chats;
+    }
+
+    public List<User> getChatMembers(UUID chatId) {
+        Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new ResourceNotFoundException("Chat " + chatId + " not found"));
+
+        List<ChatMember> chatMembers = chatMemberRepository.findAllByChat(chat);
+        List<User> users = new ArrayList<>();
+        for (ChatMember chatMember : chatMembers) {
+            users.add(chatMember.getUser());
+        }
+        return users;
+    }
+
+    public List<Chat> getBroadcastChats(String message, String authorizationHeader) {
+        User requestUser = userService.getRequestUser(authorizationHeader);
+        if (!userService.isAdmin(requestUser)) {
+            throw new AuthenticationException("Only administrators can send messages to all users");
+        }
+
+        List<User> allUsers = userService.getAllUsers();
+        List<Chat> broadcastChats = new ArrayList<>();
+
+        for (User user : allUsers) {
+            if (!user.equals(requestUser)) {
+                // check if the user has chat with the requestUser
+                List<Chat> userChats = getAllChatsForUser(user.getUsername());
+                System.out.println("User chats: " + userChats.size());
+                Chat broadCastChat = null;
+                for (Chat chat : userChats) {
+                    List<User> chatMembers = getChatMembers(chat.getId());
+                    if (chatMembers.contains(requestUser)) {
+                        broadCastChat = chat;
+                        break; // Exit loop if chat exists
+                    }
+                }
+                if (broadCastChat == null) {
+                    // If chat does not exist, create a new one
+                    CreateOrUpdateChat newChat = CreateOrUpdateChat.builder()
+                            .name("Administrator")
+                            .isGroup(false)
+                            .interlocutorUsername(user.getUsername())
+                            .build();
+                    broadCastChat = createChat(newChat, authorizationHeader);
+                    System.out.println(
+                            "New chat created between: " + requestUser.getUsername() + " and " + user.getUsername());
+                }
+                broadcastChats.add(broadCastChat);
+            }
+        }
+
+        return broadcastChats;
     }
 }

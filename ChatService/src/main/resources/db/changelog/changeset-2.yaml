@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 6-add-user-is-admin-column
+      author: greedann
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: is_admin
+                  type: BOOLEAN
+                  defaultValue: false
+                  constraints:
+                    nullable: false

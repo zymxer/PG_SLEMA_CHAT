@@ -53,4 +53,8 @@ public class User {
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime created_at;
+
+    @Column(name = "is_admin", nullable = false)
+    @Builder.Default
+    private Boolean isAdmin = false;
 }

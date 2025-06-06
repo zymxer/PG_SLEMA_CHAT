@@ -35,8 +35,7 @@ public class UserService {
                 authServiceUrl + "/verify",
                 HttpMethod.GET,
                 entity,
-                String.class
-        );
+                String.class);
 
         String username = response.getBody();
         System.out.println("verified user" + username);
@@ -47,7 +46,12 @@ public class UserService {
         return userRepository.findByUsername(username).get();
     }
 
-    public List<User> getAllUsers() { return userRepository.findAll(); }
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 
+    public boolean isAdmin(User user) {
+        return user.getIsAdmin();
+    }
 
 }
