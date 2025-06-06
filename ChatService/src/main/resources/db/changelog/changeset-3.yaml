@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 7-add-file-upload-feature
+      author: greedann
+      changes:
+        - addColumn:
+            tableName: messages
+            columns:
+              - column:
+                  name: file_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+        - addColumn:
+            tableName: messages
+            columns:
+              - column:
+                  name: file_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: true
+        - addColumn:
+            tableName: messages
+            columns:
+              - column:
+                  name: file_url
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true

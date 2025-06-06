@@ -16,6 +16,9 @@ public class MessageDto {
     private UUID chatUuid;
     private UUID messageUuid;
     private LocalDateTime timestamp;
+    private String fileName;
+    private String fileType;
+    private String fileUrl;
 
     public static MessageDto fromMessage(Message message) {
         return MessageDto.builder()
@@ -24,6 +27,9 @@ public class MessageDto {
                 .chatUuid(message.getChat().getId())
                 .messageUuid(message.getId())
                 .timestamp(message.getTimestamp())
+                .fileName(message.getFileName())
+                .fileType(message.getFileType())
+                .fileUrl(message.getFileUrl())
                 .build();
     }
 }

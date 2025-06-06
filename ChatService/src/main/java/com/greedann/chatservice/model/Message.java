@@ -47,4 +47,13 @@ public class Message {
     @Column(nullable = false)
     private Boolean isRead;
 
+    @Column(nullable = true)
+    private String fileName;
+
+    @Column(nullable = true)
+    private String fileType;
+
+    @Column(nullable = true)
+    private String fileUrl;
+
 }

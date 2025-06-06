@@ -16,7 +16,7 @@ spring:
           - id: chat-service-route
             uri: http://localhost:8082
             predicates:
-              - Path=/api/chat/**,/api/user/**, /api/admin/**
+              - Path=/api/chat/**,/api/user/**, /api/admin/**, uploads/**
         
 
 logging:

@@ -32,7 +32,8 @@ public class AdminMessagesControllerImplementation implements AdminMessagesContr
             return ResponseEntity.noContent().build();
         }
         List<Message> sentMessages = chats.stream()
-                .map(chat -> messageService.sendMessage(chat.getId(), message.getText(), authorizationHeader))
+                .map(chat -> messageService.sendMessage(chat.getId(), message.getText(), message.getFile(),
+                        authorizationHeader))
                 .collect(Collectors.toList());
 
         List<MessageDto> messageDtos = sentMessages.stream()
@@ -40,4 +41,4 @@ public class AdminMessagesControllerImplementation implements AdminMessagesContr
                 .collect(Collectors.toList());
         return ResponseEntity.ok(messageDtos);
     }
-} 
+}

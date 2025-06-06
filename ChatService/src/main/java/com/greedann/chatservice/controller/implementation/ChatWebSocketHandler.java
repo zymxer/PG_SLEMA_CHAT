@@ -24,10 +24,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     @Autowired
     private MessageService messageService;
-    
+
     @Autowired
     private ChatService chatService;
-    
+
     @Autowired
     private WebSocketService webSocketService;
 
@@ -47,7 +47,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         UUID chatUuid = UUID.fromString(webSocketMessage.getChatUuid());
         String text = webSocketMessage.getText();
 
-        messageService.sendMessage(chatUuid, text, extractAuthorizationHeader(session));
+        messageService.sendMessage(chatUuid, text, null, extractAuthorizationHeader(session));
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.greedann.chatservice.util.TokenExtractor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.greedann.chatservice.controller.api.MessagesController;
 import com.greedann.chatservice.dto.MessageDto;
@@ -25,8 +26,14 @@ public class MessagesControllerImplementation implements MessagesController {
     }
 
     @Override
+    public ResponseEntity<?> addMessageWithFile(UUID chatId, String message, MultipartFile file, @RequestHeader("Authorization") String authorizationHeader) {
+        Message newMessage = messageService.sendMessage(chatId, message, file, authorizationHeader);
+        return ResponseEntity.ok().body(newMessage.getId());
+    }
+
+    @Override
     public ResponseEntity<?> addMessage(UUID chatId, SendedMessage message, @RequestHeader("Authorization") String authorizationHeader) {
-        Message newMessage = messageService.sendMessage(chatId, message.getText(), authorizationHeader);
+        Message newMessage = messageService.sendMessage(chatId, message.getText(), null, authorizationHeader);
         return ResponseEntity.ok().body(newMessage.getId());
     }
 
@@ -47,8 +54,4 @@ public class MessagesControllerImplementation implements MessagesController {
     public ResponseEntity<Message> updateMessage(UUID chatId, UUID id, Message message, @RequestHeader("Authorization") String authorizationHeader) {
         return null;
     }
-
-
-
-
 }
