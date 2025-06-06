@@ -6,8 +6,9 @@ class ChatNavigationDestination extends StatefulWidget {
   final IconData selectedIcon;
   final String label;
   final ChatMainScreenType currentSelectedScreen;
-  final ChatMainScreenType destinationScreen;
+  final ChatMainScreenType? destinationScreen;
   final void Function(ChatMainScreenType) onPressed;
+  final void Function()? onHomePressed;
 
   const ChatNavigationDestination({
     super.key,
@@ -17,6 +18,7 @@ class ChatNavigationDestination extends StatefulWidget {
     required this.onPressed,
     required this.currentSelectedScreen,
     required this.destinationScreen,
+    this.onHomePressed,
   });
 
   @override
@@ -65,7 +67,11 @@ class ChatNavigationDestinationState
           )),
       tooltip: widget.label,
       onPressed: () {
-        widget.onPressed(widget.destinationScreen);
+        widget.onPressed(widget.destinationScreen ?? widget.currentSelectedScreen);
+        if(widget.onHomePressed != null) {
+          widget.onHomePressed!();
+        }
+
       },
     );
   }

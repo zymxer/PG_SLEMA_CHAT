@@ -13,10 +13,9 @@ class ChatWidget extends StatelessWidget {
 
   final Chat chat;
 
-  const ChatWidget({
-    super.key,
-    required this.chat,
-  });
+  ChatWidget(
+      this.chat,
+      ) {    super.key;}
 
   @override
   Widget build(BuildContext context) {

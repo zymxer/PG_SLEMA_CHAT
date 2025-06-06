@@ -4,6 +4,7 @@ import 'package:pg_slema/features/chat/auth/presentation/controller/sign_in_cont
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_up_controller.dart';
 import 'package:pg_slema/features/chat/auth/presentation/widget/auth_button.dart';
 import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_screen_controller.dart';
+import 'package:pg_slema/features/chat/user/logic/service/user_service.dart';
 import 'package:pg_slema/features/chat/user/presentation/widget/user_information_widget.dart';
 import 'package:pg_slema/utils/widgets/appbars/default_appbar.dart';
 import 'package:pg_slema/utils/widgets/appbars/white_app_bar.dart';
@@ -32,6 +33,7 @@ class _UserScreenState extends State<UserScreen> {
   @override
   Widget build(BuildContext context) {
     final mainScreenController = Provider.of<ChatMainScreenController>(context);
+    final userService = Provider.of<UserService>(context);
 
     return Column(
       children: [

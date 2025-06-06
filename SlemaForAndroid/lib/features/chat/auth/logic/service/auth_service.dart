@@ -15,11 +15,9 @@ class AuthService {
   final ApplicationInfoRepository applicationInfoRepository;
   final TokenService tokenService;
   final Dio dio;
-  late String _baseUrl;
+  final String _baseUrl = '/auth';
 
-  AuthService(this.applicationInfoRepository, this.dio, this.tokenService) {
-    _baseUrl = '/auth';
-  }
+  AuthService(this.applicationInfoRepository, this.dio, this.tokenService);
 
   Future<LoginStatus> loginUser(String username, String password) async {
 
@@ -63,7 +61,7 @@ class AuthService {
         ),
       );
       switch(response.statusCode) {
-        case 200:
+        case 201:
           return RegisterStatus(true);
         default:
           throw Exception('Failed to register. Status code: ${response.statusCode}');

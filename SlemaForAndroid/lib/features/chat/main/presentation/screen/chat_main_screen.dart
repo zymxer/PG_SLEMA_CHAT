@@ -35,19 +35,20 @@ class ChatMainScreenState extends State<ChatMainScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             ChatNavigationDestination(
-              icon: Icons.home_outlined,
+              icon: Icons.home,
               selectedIcon: Icons.home,
               label: 'Home',
               onPressed: controller.navigateTo,
-              currentSelectedScreen: ChatMainScreenType.SIGN_IN_SCREEN, // TODO fix
-              destinationScreen: ChatMainScreenType.SIGN_IN_SCREEN, // TODO case to navigate back to main
+              currentSelectedScreen: controller.currentScreen,
+              destinationScreen: null,
+              onHomePressed: () { Navigator.pop(context); },
             ),
             ChatNavigationDestination(
               icon: Icons.chat_outlined,
               selectedIcon: Icons.chat,
               label: 'Chats',
               onPressed: controller.navigateTo,
-              currentSelectedScreen: ChatMainScreenType.SIGN_IN_SCREEN, // TODO fix
+              currentSelectedScreen: controller.currentScreen, // TODO fix
               destinationScreen: ChatMainScreenType.CHATS_SCREEN,
             ),
             ChatNavigationDestination(
@@ -55,7 +56,7 @@ class ChatMainScreenState extends State<ChatMainScreen> {
               selectedIcon: Icons.account_box,
               label: 'User',
               onPressed: controller.navigateTo,
-              currentSelectedScreen: ChatMainScreenType.SIGN_IN_SCREEN, // TODO fix
+              currentSelectedScreen: controller.currentScreen,
               destinationScreen: ChatMainScreenType.USER_SCREEN,
             ),
           ],
@@ -64,7 +65,7 @@ class ChatMainScreenState extends State<ChatMainScreen> {
       body: <Widget>[
         SignInScreen(),
         SignUpScreen(),
-        ChatsScreen(service: ChatService()), // TODO fix ChatService
+        ChatsScreen(), // TODO fix ChatService
         UserScreen(),
         ChatMainLoadingScreen()
 

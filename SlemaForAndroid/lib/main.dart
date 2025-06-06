@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:pg_slema/features/chat/auth/logic/service/auth_service.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_in_controller.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_up_controller.dart';
+import 'package:pg_slema/features/chat/chats/logic/service/chat_service.dart';
 import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_screen_controller.dart';
 import 'package:pg_slema/features/chat/user/logic/entity/user.dart';
 import 'package:pg_slema/features/chat/user/logic/service/user_service.dart';
@@ -81,8 +82,8 @@ Future<void> main() async {
 
   // TODO: The address is only set at the start...
 
-  final String devAddress = "127.0.0.1";
-  final String prodAddress = "127.0.0.1"; // TODO change production address
+  final String devAddress = "10.0.2.2:8080";
+  final String prodAddress = "10.0.2.2:8080"; // TODO replace production address
 
   final logger = Loggy<Logger>("main");
   final dio = Dio();
@@ -105,6 +106,7 @@ Future<void> main() async {
   final tokenService = TokenService();
   final authService = AuthService(applicationInfoRepository, dio, tokenService);
   final userService = UserService(dio, tokenService);
+  final chatService = ChatService(dio, tokenService);
 
   // CHAT CONTROLLERS
   final chatMainScreenController = ChatMainScreenController();
@@ -132,6 +134,7 @@ Future<void> main() async {
         Provider<AuthService>(create: (_) => authService),
         Provider<UserService>(create: (_) => userService),
         Provider<TokenService>(create: (_) => tokenService),
+        ChangeNotifierProvider<ChatService>(create: (_) => chatService),
 
         // CHAT CONTROLLERS
         ChangeNotifierProvider(create: (context) => chatMainScreenController),
