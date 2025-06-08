@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 public class ChatMemberControllerImplementation implements ChatMemberController {
@@ -18,17 +19,17 @@ public class ChatMemberControllerImplementation implements ChatMemberController 
     }
 
     @Override
-    public ResponseEntity<List<ChatMember>> getAllChatMembers(@PathVariable Long chatId, @RequestHeader("Authorization") String authorizationHeader) {
-        return ResponseEntity.ok().body(List.of(ChatMember.builder().build(), ChatMember.builder().build()));
+    public ResponseEntity<List<ChatMember>> getAllChatMembers(@PathVariable UUID chatId, @RequestHeader("Authorization") String authorizationHeader) {
+        return ResponseEntity.ok(List.of());
     }
 
     @Override
-    public ResponseEntity<Void> deleteChatMember(@PathVariable Long chatId, @PathVariable Long id, @RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<Void> deleteChatMember(@PathVariable UUID chatId, @PathVariable UUID id, @RequestHeader("Authorization") String authorizationHeader) {
         return null;
     }
 
     @Override
-    public ResponseEntity<ChatMember> updateChatMember(@PathVariable Long chatId, @PathVariable Long id,
+    public ResponseEntity<ChatMember> updateChatMember(@PathVariable UUID chatId, @PathVariable UUID id,
             @RequestBody ChatMember chatMember, @RequestHeader("Authorization") String authorizationHeader) {
         return null;
     }

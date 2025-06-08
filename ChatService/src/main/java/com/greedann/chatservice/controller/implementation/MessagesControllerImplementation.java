@@ -3,7 +3,6 @@ package com.greedann.chatservice.controller.implementation;
 import java.util.List;
 import java.util.UUID;
 
-import com.greedann.chatservice.util.TokenExtractor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,11 +17,9 @@ import com.greedann.chatservice.service.MessageService;
 @RestController
 public class MessagesControllerImplementation implements MessagesController {
     private final MessageService messageService;
-    private final TokenExtractor tokenExtractor;
 
-    public MessagesControllerImplementation(MessageService messageService, TokenExtractor tokenExtractor) {
+    public MessagesControllerImplementation(MessageService messageService) {
         this.messageService = messageService;
-        this.tokenExtractor = tokenExtractor;
     }
 
     @Override

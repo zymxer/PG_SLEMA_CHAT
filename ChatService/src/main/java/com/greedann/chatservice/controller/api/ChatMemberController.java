@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.greedann.chatservice.model.ChatMember;
 
@@ -15,13 +16,13 @@ public interface ChatMemberController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<ChatMember>> getAllChatMembers(@PathVariable Long chatId, @RequestHeader("Authorization") String authorizationHeader);
+    public ResponseEntity<List<ChatMember>> getAllChatMembers(@PathVariable UUID chatId, @RequestHeader("Authorization") String authorizationHeader);
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteChatMember(@PathVariable Long chatId, @PathVariable Long id,@RequestHeader("Authorization") String authorizationHeader);
+    public ResponseEntity<Void> deleteChatMember(@PathVariable UUID chatId, @PathVariable UUID id,@RequestHeader("Authorization") String authorizationHeader);
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ChatMember> updateChatMember(@PathVariable Long chatId, @PathVariable Long id,
+    public ResponseEntity<ChatMember> updateChatMember(@PathVariable UUID chatId, @PathVariable UUID id,
             @RequestBody ChatMember chatMember, @RequestHeader("Authorization") String authorizationHeader);
 
 }
