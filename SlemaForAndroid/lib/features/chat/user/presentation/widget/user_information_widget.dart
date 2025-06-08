@@ -44,7 +44,7 @@ class _UserInformationWidgetState extends State<UserInformationWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  height: 32,
+                  height: 40,
                   child:
                   Text(
                     widget.headerText,

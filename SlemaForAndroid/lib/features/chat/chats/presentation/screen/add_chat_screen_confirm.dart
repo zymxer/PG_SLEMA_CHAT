@@ -13,14 +13,15 @@ import 'package:pg_slema/utils/widgets/default_floating_action_button/default_fl
 import 'package:pg_slema/utils/widgets/forms/text_input.dart';
 import 'package:provider/provider.dart';
 
-class AddChatScreen extends StatefulWidget {
-  AddChatScreen({super.key});
+class AddChatScreenConfirm extends StatefulWidget {
+
+  AddChatScreenConfirm({super.key});
 
   @override
-  State<StatefulWidget> createState() => AddChatScreenState();
+  State<StatefulWidget> createState() => AddChatScreenConfirmState();
 }
 
-class AddChatScreenState extends State<AddChatScreen> {
+class AddChatScreenConfirmState extends State<AddChatScreenConfirm> {
   @override
   void initState() {
     super.initState();
@@ -34,7 +35,7 @@ class AddChatScreenState extends State<AddChatScreen> {
     return Scaffold(
       body: Column(
         children: [
-          DefaultAppBar(title: "Dodaj czat"),
+          DefaultAppBar(title: "Zatwierdź"),
           DefaultBodyWithMultipleFloatingActionButtons(
             buttons: [(() => controller.createChat(), Icons.check)],
             child: SingleChildScrollView(
@@ -44,16 +45,16 @@ class AddChatScreenState extends State<AddChatScreen> {
                   children: [
                     const SizedBox(height: 20.0),
                     CustomTextFormField(
-                      label: "Szukaj użytkownika",
+                      label: "Nazwa konwersacji",
                       initialValue: controller.search,
                       icon: Icons.search,
                       onChanged: (value) => controller.search = value,
                     ),
                     ListView.separated(
                       shrinkWrap: true,
-                      itemCount: controller.filteredUsers.length,
+                      itemCount: controller.selected.length,
                       itemBuilder: (context, index) {
-                        final user = controller.filteredUsers[index];
+                        final user = controller.selected[index];
                         return UserEntryWidget(
                           user: user,
                           onTap: controller.onUserTap,

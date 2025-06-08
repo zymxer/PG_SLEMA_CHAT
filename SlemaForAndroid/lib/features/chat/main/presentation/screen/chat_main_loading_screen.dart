@@ -59,7 +59,7 @@ class _ChatMainLoadingScreenState extends State<ChatMainLoadingScreen> {
                         });
                         return SizedBox();
                       }
-                      else if (snapshot.hasData) {
+                      else if (snapshot.hasData && snapshot.connectionState == ConnectionState.done) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           controller.navigateTo(
                               ChatMainScreenType.CHATS_SCREEN);

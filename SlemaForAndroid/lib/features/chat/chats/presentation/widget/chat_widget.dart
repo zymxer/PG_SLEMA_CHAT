@@ -10,39 +10,40 @@ import 'package:pg_slema/utils/widgets/default_container/default_container.dart'
 //from SingleMedicineWidget
 // TODO stateful for message preview updates
 class ChatWidget extends StatelessWidget {
-
   final Chat chat;
 
   ChatWidget(
-      this.chat,
-      ) {    super.key;}
+    this.chat,
+  ) {
+    super.key;
+  }
 
   @override
   Widget build(BuildContext context) {
     return DefaultContainer(
-      padding: const EdgeInsets.only(bottom: 20), //todo check size
-      child: ElevatedButton(  //todo кринжово выглядит фон
+        padding: const EdgeInsets.only(bottom: 20), //todo check size
+        child: ElevatedButton(
+          //todo кринжово выглядит фон
           onPressed: () => _onPressed(context, chat),
           child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-              padding: const EdgeInsets.only(right: 10.0),
-              child: Icon(  // TODO profile pic
-                Icons.telegram,
-                color: Theme.of(context).primaryColor,
-                size: 40,
-              )
-          ),
-          Expanded(
-              child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: Icon(
+                    // TODO profile pic
+                    Icons.telegram,
+                    color: Theme.of(context).primaryColor,
+                    size: 40,
+                  )),
+              Expanded(
+                  child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
                     height: 32,
-                    child:
-                    Text(
+                    child: Text(
                       "YYYYYYyyyyyyyyyppppppppggggg", // TODO fix view
                       style: Theme.of(context).textTheme.headlineMedium,
                       overflow: TextOverflow.ellipsis,
@@ -59,23 +60,20 @@ class ChatWidget extends StatelessWidget {
                     ),
                   )
                 ],
-              )
+              )),
+              //TODO unread counnter
+              //TODO pop up
+            ],
           ),
-          //TODO unread counnter
-          //TODO pop up
-        ],
-          ),
-      )
-    );
+        ));
   }
 
   void _onPressed(BuildContext context, Chat chat) {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => ChatScreen(controller: ChatController())  //todo injected controller
-        )
-    );
+            builder: (context) => ChatScreen(
+                controller: ChatController()) //todo injected controller
+            ));
   }
-
 }

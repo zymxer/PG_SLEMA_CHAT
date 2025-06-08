@@ -8,7 +8,7 @@ import 'package:pg_slema/features/chat/user/logic/entity/user.dart';
 import 'package:pg_slema/features/chat/user/logic/entity/userDto.dart';
 import 'package:pg_slema/utils/token/token_service.dart';
 
-class UserService {
+class UserService extends ChangeNotifier {
   final Dio dio;
   final TokenService tokenService;
   final String _baseUrl = '/api/user';

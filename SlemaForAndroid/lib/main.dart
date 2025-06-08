@@ -7,6 +7,8 @@ import 'package:pg_slema/features/chat/auth/logic/service/auth_service.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_in_controller.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_up_controller.dart';
 import 'package:pg_slema/features/chat/chats/logic/service/chat_service.dart';
+import 'package:pg_slema/features/chat/chats/presentation/controller/add_chat_controller.dart';
+import 'package:pg_slema/features/chat/chats/presentation/controller/chats_controller.dart';
 import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_screen_controller.dart';
 import 'package:pg_slema/features/chat/user/logic/entity/user.dart';
 import 'package:pg_slema/features/chat/user/logic/service/user_service.dart';
@@ -110,6 +112,10 @@ Future<void> main() async {
 
   // CHAT CONTROLLERS
   final chatMainScreenController = ChatMainScreenController();
+  final signInController = SignInController(authService, chatMainScreenController);
+  final signUpController = SignUpController(authService);
+  final addChatController = AddChatController(chatService, userService);
+  final allChatsController = AllChatsController(chatService);
 
   runApp(
     MultiProvider(
@@ -132,18 +138,16 @@ Future<void> main() async {
 
         // CHAT SERVICES
         Provider<AuthService>(create: (_) => authService),
-        Provider<UserService>(create: (_) => userService),
+        ChangeNotifierProvider<UserService>(create: (_) => userService),
         Provider<TokenService>(create: (_) => tokenService),
         ChangeNotifierProvider<ChatService>(create: (_) => chatService),
 
         // CHAT CONTROLLERS
         ChangeNotifierProvider(create: (context) => chatMainScreenController),
-        ChangeNotifierProvider(create: (context) => SignInController(
-          authService, chatMainScreenController
-        )),
-        ChangeNotifierProvider(create: (context) => SignUpController(
-          authService
-        )),
+        ChangeNotifierProvider(create: (context) => signInController),
+        ChangeNotifierProvider(create: (context) => signUpController),
+        ChangeNotifierProvider(create: (context) => addChatController),
+        ChangeNotifierProvider(create: (context) => allChatsController)
 
       ],
       child: MaterialApp(

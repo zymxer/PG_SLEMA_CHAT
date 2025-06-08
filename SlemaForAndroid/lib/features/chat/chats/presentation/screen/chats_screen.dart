@@ -9,7 +9,6 @@ import 'package:pg_slema/utils/widgets/appbars/white_app_bar.dart';
 import 'package:provider/provider.dart';
 
 class ChatsScreen extends StatefulWidget {
-
   const ChatsScreen({
     super.key,
   });
@@ -19,61 +18,50 @@ class ChatsScreen extends StatefulWidget {
 }
 
 class ChatsScreenState extends State<ChatsScreen> {
-
   bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
-    //_controller.fetchChats
+    Provider.of<AllChatsController>(context, listen: false).fetchChats();
   }
 
   @override
   Widget build(BuildContext context) {
-    final chatService = Provider.of<ChatService>(context, listen: true);
+    final controller = Provider.of<AllChatsController>(context, listen: true);
+
     return Column(children: [
       const WhiteAppBar(titleText: "Wiadomości"),
       DefaultBodyWithFloatingActionButton(
-        onFloatingButtonPressed: _openAddExerciseScreen,  // TODO
-        child: Column(
-            children: [
-              FutureBuilder<List<Chat>>(  // TODO init chatService data
-                  future: _initialized? chatService.getAllChats() : Future.value([]),
-                  builder: (context, snapshot) {
-                    if(snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if(snapshot.hasError) {
-                      print("Error while fetching initial chats");
-                      return const SizedBox.shrink();
-                    }
-                    _initialized = true;
-                    return const SizedBox.shrink();
-                  }
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: chatService.chats.length,
-                  itemBuilder: (context, index) => ChatWidget(chatService.chats[index]),
-                  ),
-                ),
-            ]
-        ),
-        // child: ListView.builder(
-        //   //itemCount: _controller.chats.length,
-        //   itemCount: 15,
-        //   padding: EdgeInsets.zero,
-        //   itemBuilder: (context, index) {
-        //     return ChatWidget(
-        //       chat: Chat("id", "Chat name"),
-        //     );
-        //   },
-        // ),
+        onFloatingButtonPressed: _openAddChatScreen, // TODO
+        child: Column(children: [
+          FutureBuilder<List<Chat>>(
+              future: controller.chatsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  print("Error while fetching initial chats");
+                  return const SizedBox.shrink();
+                } else if (snapshot.hasData &&
+                    snapshot.connectionState == ConnectionState.done) {
+                  return Expanded(
+                    child: ListView.builder(
+                      itemCount: controller.allChats.length,
+                      itemBuilder: (context, index) =>
+                          ChatWidget(controller.allChats[index]),
+                    ),
+                  );
+                }
+                return SizedBox.shrink();
+              }),
+        ]),
       ),
     ]);
   }
 
-  void _openAddExerciseScreen() {
+  void _openAddChatScreen() {
     Navigator.push(
       context,
       MaterialPageRoute(
