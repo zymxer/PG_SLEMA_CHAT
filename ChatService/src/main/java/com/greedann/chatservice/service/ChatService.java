@@ -161,4 +161,21 @@ public class ChatService {
 
         return broadcastChats;
     }
+
+    public Chat updateChat(UUID id, CreateOrUpdateChat chat, String authorizationHeader) {
+        User requestUser = userService.getRequestUser(authorizationHeader);
+        Chat existingChat = chatRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Chat " + id + " not found"));
+
+        ChatMember chatMember = chatMemberRepository.findByChatAndUser(existingChat, requestUser)
+                .orElseThrow(() -> new AuthenticationException("You do not have permission to update this chat"));
+
+        if (!"creator".equals(chatMember.getRole())) {
+            throw new AuthenticationException("Only creators can update this chat");
+        }
+
+        existingChat.setName(chat.getName());
+        existingChat.setIsGroup(chat.getIsGroup());
+        return chatRepository.save(existingChat);
+    }
 }

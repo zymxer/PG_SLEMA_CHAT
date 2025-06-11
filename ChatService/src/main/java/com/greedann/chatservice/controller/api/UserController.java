@@ -1,7 +1,6 @@
 package com.greedann.chatservice.controller.api;
 
 import com.greedann.chatservice.dto.UserDto;
-import com.greedann.chatservice.model.Chat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
