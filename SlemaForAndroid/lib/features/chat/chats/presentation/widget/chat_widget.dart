@@ -42,9 +42,9 @@ class ChatWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    height: 32,
+                    height: 40,
                     child: Text(
-                      "YYYYYYyyyyyyyyyppppppppggggg", // TODO fix view
+                      chat.name, // TODO fix view
                       style: Theme.of(context).textTheme.headlineMedium,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.left,

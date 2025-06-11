@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pg_slema/features/chat/auth/logic/service/auth_service.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_in_controller.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_up_controller.dart';
 import 'package:pg_slema/features/chat/auth/presentation/widget/auth_button.dart';
@@ -10,6 +11,7 @@ import 'package:pg_slema/features/chat/user/presentation/widget/user_information
 import 'package:pg_slema/utils/widgets/appbars/default_appbar.dart';
 import 'package:pg_slema/utils/widgets/appbars/white_app_bar.dart';
 import 'package:pg_slema/utils/widgets/default_body/default_body.dart';
+import 'package:pg_slema/utils/widgets/default_circular_button.dart';
 import 'package:pg_slema/utils/widgets/forms/text_input.dart';
 import 'package:provider/provider.dart';
 
@@ -64,6 +66,10 @@ class _UserScreenState extends State<UserScreen> {
                       icon: Icons.info,
                       headerText: "O siebie",
                       footerText: "Używam aplikację SLEMA"),
+                  SizedBox(height: 40),
+                  DefaultCircularButton(
+                      onPressed: () {Provider.of<AuthService>(context, listen: false).logOut(context);},
+                      label: "Wyloguj się")
                 ],
               ),
             ),

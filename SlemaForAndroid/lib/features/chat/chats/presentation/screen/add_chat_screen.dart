@@ -31,45 +31,35 @@ class AddChatScreenState extends State<AddChatScreen> {
   Widget build(BuildContext context) {
     final controller = Provider.of<AddChatController>(context);
 
-    return Scaffold(
-      body: Column(
-        children: [
-          DefaultAppBar(title: "Dodaj czat"),
-          DefaultBodyWithMultipleFloatingActionButtons(
-            buttons: [(() => controller.createChat(), Icons.check)],
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20.0),
-                    CustomTextFormField(
-                      label: "Szukaj użytkownika",
-                      initialValue: controller.search,
-                      icon: Icons.search,
-                      onChanged: (value) => controller.search = value,
-                    ),
-                    ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: controller.filteredUsers.length,
-                      itemBuilder: (context, index) {
-                        final user = controller.filteredUsers[index];
-                        return UserEntryWidget(
-                          user: user,
-                          onTap: controller.onUserTap,
-                        );
-                      },
-                      separatorBuilder: (context, int index) {
-                        return const SizedBox(height: 20);
-                      },
-                    )
-                  ],
-                ),
-              ),
-            ),
+    return Column(children: [
+      DefaultAppBar(title: "Dodaj czat"),
+      DefaultBodyWithMultipleFloatingActionButtons(
+        buttons: [(() => controller.createChat(), Icons.check)],
+        child: Column(children: [
+          const SizedBox(height: 20.0),
+          CustomTextFormField(
+            label: "Szukaj użytkownika",
+            initialValue: controller.search,
+            icon: Icons.search,
+            onChanged: (value) => controller.search = value,
           ),
-        ],
+          Expanded(
+              child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: controller.filteredUsers.length,
+            itemBuilder: (context, index) {
+              final user = controller.filteredUsers[index];
+              return UserEntryWidget(
+                user: user,
+                onTap: controller.onUserTap,
+              );
+            },
+            separatorBuilder: (context, int index) {
+              return const SizedBox(height: 20);
+            },
+          ))
+        ]),
       ),
-    );
+    ]);
   }
 }

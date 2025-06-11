@@ -13,7 +13,7 @@ class GetChatResponse {
   }
 
   Chat toChat() {
-    return Chat(id, name);
+    return Chat(id, name, isGroup);
   }
 
 }

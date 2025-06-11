@@ -64,6 +64,12 @@ class ChatMainScreenController extends ChangeNotifier {
     hasBottomBar = _hasBottomBarFromScreenType(screenType);
   }
 
+  void toDefaultState() {
+    _currentIndex = 4;
+    _currentScreen = ChatMainScreenType.MAIN_LOADING_SCREEN;
+    _hasBottomBar = false;
+  }
+
   //TODO remove switches, add new classes
 
   int _indexFromScreenType(ChatMainScreenType screenType) {

@@ -20,12 +20,12 @@ class SignInController extends ChangeNotifier {
   void logIn() async{
     try {
       loginStatus = await authService.loginUser(username, password);
-      if(true && loginStatus.status) {
+      if(loginStatus.status) {
         mainScreenController.navigateTo(ChatMainScreenType.CHATS_SCREEN);
       }
     }
     catch (ex){
-      print("Login exception: $ex");    // TODO NEXT - забилдить
+      print("Login exception: $ex");
     }
   }
 }

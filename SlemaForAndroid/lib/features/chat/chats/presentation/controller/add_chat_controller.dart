@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:pg_slema/features/chat/chats/logic/entity/create_chat_request.dart';
 import 'package:pg_slema/features/chat/chats/logic/service/chat_service.dart';
 import 'package:pg_slema/features/chat/user/logic/entity/user.dart';
 import 'package:pg_slema/features/chat/user/logic/service/user_service.dart';
@@ -29,8 +30,9 @@ class AddChatController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void createChat() {
-
+  void createChat() async{
+    final interlocutor = selected[0];
+    await chatService.createChat(CreateChatRequest(interlocutor.name, 0, interlocutor.name));
   }
 
   void onUserTap(User user) {
@@ -50,6 +52,7 @@ class AddChatController extends ChangeNotifier {
   void fetchUsers() async{
     usersFuture = userService.getAllUsers().then((users) {
       allUsers = users;
+      allUsers.remove(userService.currentUser!);
       filteredUsers = allUsers.take(shownCount).toList();
       notifyListeners();
       return users;

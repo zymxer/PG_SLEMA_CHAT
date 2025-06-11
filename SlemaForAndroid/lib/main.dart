@@ -104,16 +104,17 @@ Future<void> main() async {
   dio.options.connectTimeout = const Duration(seconds: 5);
   dio.options.receiveTimeout = const Duration(seconds: 3);
 
+
+  final chatMainScreenController = ChatMainScreenController();
   // CHAT SERVICES
   final tokenService = TokenService();
-  final authService = AuthService(applicationInfoRepository, dio, tokenService);
   final userService = UserService(dio, tokenService);
+  final authService = AuthService(applicationInfoRepository, dio, tokenService, userService, chatMainScreenController);
   final chatService = ChatService(dio, tokenService);
 
   // CHAT CONTROLLERS
-  final chatMainScreenController = ChatMainScreenController();
   final signInController = SignInController(authService, chatMainScreenController);
-  final signUpController = SignUpController(authService);
+  final signUpController = SignUpController(authService, chatMainScreenController);
   final addChatController = AddChatController(chatService, userService);
   final allChatsController = AllChatsController(chatService);
 
