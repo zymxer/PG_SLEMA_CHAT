@@ -7,12 +7,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import com.greedann.chatservice.dto.ChatMemberDto;
 import com.greedann.chatservice.model.ChatMember;
 
 @RequestMapping("/api/chat/{chatId}/members")
 public interface ChatMemberController {
     @PostMapping
-    public ResponseEntity<ChatMember> addChatMember(@RequestBody ChatMember chatMember, @RequestHeader("Authorization") String authorizationHeader);
+    public ResponseEntity<ChatMember> addChatMember(@PathVariable UUID chatId, @RequestBody ChatMemberDto chatMember, @RequestHeader("Authorization") String authorizationHeader);
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
