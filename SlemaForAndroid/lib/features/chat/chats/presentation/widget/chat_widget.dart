@@ -70,10 +70,6 @@ class ChatWidget extends StatelessWidget {
 
   void _onPressed(BuildContext context, Chat chat) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => ChatScreen(
-                controller: ChatController()) //todo injected controller
-            ));
+        context, MaterialPageRoute(builder: (context) => ChatScreen(chat)));
   }
 }

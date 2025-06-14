@@ -1,17 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pg_slema/features/chat/chats/logic/entity/message.dart';
+import 'package:pg_slema/features/chat/user/logic/service/user_service.dart';
+import 'package:provider/provider.dart';
 
-enum MessageType {
-  Received,
-  ReceivedGroup,
-  Sent
-}
+enum MessageType { Received, ReceivedGroup, Sent }
 
 class MessageWidget extends StatefulWidget {
-  final MessageType type;
-  MessageWidget({
+  final Message message;
+  const MessageWidget(
+    this.message, {
     super.key,
-    required this.type
   });
 
   @override
@@ -19,37 +18,47 @@ class MessageWidget extends StatefulWidget {
 }
 
 class MessageWidgetState extends State<MessageWidget> {
+  late MessageType type;
 
+  @override
+  void initState() {
+    super.initState();
+    type = widget.message.senderId ==
+            Provider.of<UserService>(context, listen: false).currentUser!.id
+        ? MessageType.Sent
+        : MessageType.Received;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Align(
-        alignment: messageAlignment(widget.type),
-        child: Container(
-            constraints: const BoxConstraints(maxWidth: 200, minWidth: 100), //todo
-            decoration: messageDecoration(widget.type),
-            child: Text(
-                "weruityweioutyewrioutyweriotuywerotiywerioutyertuioywerioutyerioutyeriotyweiotuyweruiotyweriouty",
-           style: Theme.of(context).textTheme.labelSmall,
-            ),
+      alignment: messageAlignment(type),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 200, minWidth: 100), //todo
+        decoration: messageDecoration(type),
+        child: Text(
+          widget.message.content,
+          style: Theme.of(context).textTheme.labelSmall,
         ),
+      ),
     );
   }
 
   Alignment messageAlignment(MessageType type) {
-    return widget.type == MessageType.Sent ? Alignment.centerRight : Alignment.centerLeft;
+    return type == MessageType.Sent
+        ? Alignment.centerRight
+        : Alignment.centerLeft;
   }
 
   BoxDecoration messageDecoration(MessageType type) {
-    switch(type) {
+    switch (type) {
       case MessageType.Received || MessageType.ReceivedGroup:
         return new BoxDecoration(
           color: Theme.of(context).colorScheme.primaryContainer,
           borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
-              bottomRight: Radius.circular(12)
-          ),
+              bottomRight: Radius.circular(12)),
           boxShadow: [
             BoxShadow(
               color: Theme.of(context).colorScheme.shadow,
@@ -68,8 +77,7 @@ class MessageWidgetState extends State<MessageWidget> {
           borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
-              bottomLeft: Radius.circular(12)
-          ),
+              bottomLeft: Radius.circular(12)),
           boxShadow: [
             BoxShadow(
               color: Theme.of(context).colorScheme.shadow,
@@ -84,5 +92,4 @@ class MessageWidgetState extends State<MessageWidget> {
         );
     }
   }
-
 }

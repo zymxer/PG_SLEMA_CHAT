@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:path/path.dart';
 import 'package:pg_slema/features/chat/auth/logic/service/auth_service.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_in_controller.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_up_controller.dart';
 import 'package:pg_slema/features/chat/chats/logic/service/chat_service.dart';
 import 'package:pg_slema/features/chat/chats/presentation/controller/add_chat_controller.dart';
+import 'package:pg_slema/features/chat/chats/presentation/controller/chat_controller.dart';
 import 'package:pg_slema/features/chat/chats/presentation/controller/chats_controller.dart';
 import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_screen_controller.dart';
 import 'package:pg_slema/features/chat/user/logic/entity/user.dart';
@@ -116,7 +118,8 @@ Future<void> main() async {
   final signInController = SignInController(authService, chatMainScreenController);
   final signUpController = SignUpController(authService, chatMainScreenController);
   final addChatController = AddChatController(chatService, userService);
-  final allChatsController = AllChatsController(chatService);
+  final allChatsController = AllChatsController(chatService, userService);
+  final chatController = ChatController(chatService, userService);
 
   runApp(
     MultiProvider(
@@ -148,7 +151,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => signInController),
         ChangeNotifierProvider(create: (context) => signUpController),
         ChangeNotifierProvider(create: (context) => addChatController),
-        ChangeNotifierProvider(create: (context) => allChatsController)
+        ChangeNotifierProvider(create: (context) => allChatsController),
+        ChangeNotifierProvider(create: (context) => chatController),
 
       ],
       child: MaterialApp(

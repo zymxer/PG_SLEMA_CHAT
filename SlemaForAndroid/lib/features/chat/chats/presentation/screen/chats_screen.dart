@@ -18,7 +18,6 @@ class ChatsScreen extends StatefulWidget {
 }
 
 class ChatsScreenState extends State<ChatsScreen> {
-  bool _initialized = false;
 
   @override
   void initState() {
@@ -33,7 +32,7 @@ class ChatsScreenState extends State<ChatsScreen> {
     return Column(children: [
       const WhiteAppBar(titleText: "Wiadomości"),
       DefaultBodyWithFloatingActionButton(
-        onFloatingButtonPressed: _openAddChatScreen, // TODO
+        onFloatingButtonPressed: _openAddChatScreen,
         child: Column(children: [
           FutureBuilder<List<Chat>>(
               future: controller.chatsFuture,

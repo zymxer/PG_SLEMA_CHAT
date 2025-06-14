@@ -17,7 +17,7 @@ class GetMessageResponse {
   }
 
   Message toMessage() {
-    return Message(messageUuid, text, authorUuid);
+    return Message(messageUuid, text, authorUuid, chatUuid);
   }
 
 }
