@@ -106,16 +106,15 @@ Future<void> main() async {
   dio.options.connectTimeout = const Duration(seconds: 5);
   dio.options.receiveTimeout = const Duration(seconds: 3);
 
-
+  final chatImageMetadataRepository =
+  await SharedPreferencesStoredImageMetadataRepository.create();
+  final chatImageService = ImageServiceChatImpl(repository: chatImageMetadataRepository);
   final chatMainScreenController = ChatMainScreenController();
   // CHAT SERVICES
   final tokenService = TokenService();
   final userService = UserService(dio, tokenService);
   final authService = AuthService(applicationInfoRepository, dio, tokenService, userService, chatMainScreenController);
-  final chatService = ChatService(dio, tokenService);
-  final chatImageMetadataRepository =
-  await SharedPreferencesStoredImageMetadataRepository.create();
-  final chatImageService = ImageServiceChatImpl(repository: chatImageMetadataRepository);
+  final chatService = ChatService(dio, tokenService, chatImageService);
 
   // CHAT CONTROLLERS
   final signInController = SignInController(authService, chatMainScreenController);

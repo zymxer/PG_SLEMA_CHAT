@@ -43,10 +43,27 @@ class ImageServiceChatImpl with Logger {
         .toList(growable: false);
   }
 
+  Future<bool> checkIfSaved(String filename) async {
+    final metadata = await loadImageData();
+    return metadata.any((entry) => entry.filename == filename);
+  }
+
   Future<(List<ImageMetadata>, List<XFile>)>
       selectAndAddImagesFromGallery() async {
     final pickedFiles = await picker.pickMultiImage(limit: 10);
     return _saveImages(pickedFiles);
+  }
+
+  Future<ImageMetadata> saveImage(XFile file) async {
+    final metadata = StoredImageMetadata(
+      id: const Uuid().v4(),
+      filename: file.path,
+    );
+    await repository.save(metadata);
+    return ImageMetadata(
+        id: metadata.id,
+        filename: metadata.filename,
+        date: (await FileStat.stat(metadata.filename)).changed);
   }
 
   Future<(List<ImageMetadata>, List<XFile>)> _saveImages(

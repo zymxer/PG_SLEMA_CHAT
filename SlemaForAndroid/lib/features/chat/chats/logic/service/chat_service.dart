@@ -4,6 +4,8 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/chat.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/chat_member.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/create_chat_request.dart';
@@ -13,6 +15,8 @@ import 'package:pg_slema/features/chat/chats/logic/entity/message.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/post_message_request.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/post_message_responce.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/webSocket_message.dart';
+import 'package:pg_slema/features/gallery/logic/entity/image_metadata.dart';
+import 'package:pg_slema/features/gallery/logic/service/image_service_chat_impl.dart';
 import 'package:pg_slema/utils/token/token_service.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -24,27 +28,26 @@ enum WebSocketState {
 }
 
 class ChatService extends ChangeNotifier {
-
   final Dio dio;
   final TokenService tokenService;
+  final ImageServiceChatImpl chatImageService;
   // todo repository
 
-  final String _baseUrl = '/api/chat';  // todo Move to ApplicationInfoRepository
+  final String _baseUrl = '/api/chat'; // todo Move to ApplicationInfoRepository
 
   late IOWebSocketChannel _webSocketChannel;
   late StreamSubscription _socketSubscription;
   final StreamController<Message> _messageStreamController =
-  StreamController<Message>.broadcast();
+      StreamController<Message>.broadcast();
   WebSocketState wsState = WebSocketState.disconnected;
 
   Stream<Message> get newMessages => _messageStreamController.stream;
 
   List<Chat> chats = [];
 
-  ChatService(this.dio, this.tokenService);
+  ChatService(this.dio, this.tokenService, this.chatImageService);
 
   Future<List<Chat>> getAllChats() async {
-
     final String endpoint = _baseUrl;
     final token = await tokenService.getToken();
 
@@ -58,28 +61,27 @@ class ChatService extends ChangeNotifier {
           },
         ),
       );
-      switch(response.statusCode) {
+      switch (response.statusCode) {
         case 200:
           final List<dynamic> data = response.data as List<dynamic>;
-          final new_chats = data.map(
-                  (jsonChat) => GetChatResponse.fromJson(jsonChat).toChat()
-          ).toList();
+          final new_chats = data
+              .map((jsonChat) => GetChatResponse.fromJson(jsonChat).toChat())
+              .toList();
           // TODO add new chats to repository, assign chats to all from repository
           chats = new_chats;
           notifyListeners();
           return chats;
 
         default:
-          throw Exception('Failed to fetch chats. Status code: ${response.statusCode}');
+          throw Exception(
+              'Failed to fetch chats. Status code: ${response.statusCode}');
       }
-    }
-    catch (e) {
+    } catch (e) {
       throw Exception('Error during fetching chats: $e');
     }
   }
 
   Future<bool> createChat(CreateChatRequest request) async {
-
     final String endpoint = _baseUrl;
     final token = await tokenService.getToken();
 
@@ -94,20 +96,19 @@ class ChatService extends ChangeNotifier {
           },
         ),
       );
-      switch(response.statusCode) {
+      switch (response.statusCode) {
         case 200:
           return true;
         default:
-          throw Exception('Failed to fetch chats. Status code: ${response.statusCode}');
+          throw Exception(
+              'Failed to fetch chats. Status code: ${response.statusCode}');
       }
-    }
-    catch (e) {
+    } catch (e) {
       throw Exception('Error during creating a chat: $e');
     }
   }
 
   Future<List<Message>> getChatMessages(String chatId) async {
-
     final String endpoint = "$_baseUrl/$chatId/messages";
     final token = await tokenService.getToken();
 
@@ -121,24 +122,39 @@ class ChatService extends ChangeNotifier {
           },
         ),
       );
-      switch(response.statusCode) {
+      switch (response.statusCode) {
         case 200:
           final List<dynamic> data = response.data as List<dynamic>;
-          return data.map(
-                  (jsonMessage) => GetMessageResponse.fromJson(jsonMessage).toMessage()
-          ).toList();
+
+          List<GetMessageResponse> dtos = data
+              .map((jsonMessage) => GetMessageResponse.fromJson(jsonMessage))
+              .toList();
+          List<Message> messages = [];
+          final savedImages = (await chatImageService.loadImageData()).toList();
+          for (int i = 0; i < dtos.length; i++) {
+            messages.add(dtos[i].toMessage());
+            if (dtos[i].fileUrl == null) {
+              continue;
+            }
+            if(savedImages.any((entry) => entry.filename == dtos[i].fileUrl!.split('/').last)) {
+              continue;
+            }
+            final metadata = await downloadAndSaveFile(dtos[i]);
+            messages[i].imageMetadata = metadata;
+            savedImages.add(metadata);
+          }
+          return messages;
 
         default:
-          throw Exception('Failed to fetch chat messages. Status code: ${response.statusCode}');
+          throw Exception(
+              'Failed to fetch chat messages. Status code: ${response.statusCode}');
       }
-    }
-    catch (e) {
+    } catch (e) {
       throw Exception('Error during fetching chat messages: $e');
     }
   }
 
-  Future<PostMessageResponse> sendMessage(PostMessageRequest request) async{
-
+  Future<PostMessageResponse> sendMessage(PostMessageRequest request) async {
     final String endpoint = "$_baseUrl/${request.chat.id}/messages";
 
     final token = await tokenService.getToken();
@@ -157,19 +173,16 @@ class ChatService extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         return PostMessageResponse(response.data, true);
+      } else {
+        throw Exception(
+            'Failed to send a message. Status code: ${response.statusCode}');
       }
-      else {
-        throw Exception('Failed to send a message. Status code: ${response.statusCode}');
-      }
-    }
-
-    catch (e) {
+    } catch (e) {
       throw Exception('Error during sending a message: $e');
     }
   }
 
   Future<List<ChatMember>> getChatMembers(String chatId) async {
-
     final String endpoint = "$_baseUrl/$chatId/members";
     final token = await tokenService.getToken();
 
@@ -183,22 +196,21 @@ class ChatService extends ChangeNotifier {
           },
         ),
       );
-      switch(response.statusCode) {
+      switch (response.statusCode) {
         case 200:
           final List<dynamic> data = response.data as List<dynamic>;
-          return data.map(
-                  (jsonMember) => ChatMember.fromJson(jsonMember)
-          ).toList();
+          return data
+              .map((jsonMember) => ChatMember.fromJson(jsonMember))
+              .toList();
 
         default:
-          throw Exception('Failed to fetch chat members. Status code: ${response.statusCode}');
+          throw Exception(
+              'Failed to fetch chat members. Status code: ${response.statusCode}');
       }
-    }
-    catch (e) {
+    } catch (e) {
       throw Exception('Error during fetching chat members: $e');
     }
   }
-
 
   Future<void> connectWebSocket() async {
     final token = await tokenService.getToken();
@@ -217,21 +229,20 @@ class ChatService extends ChangeNotifier {
     wsState = WebSocketState.connected;
     print("WebSocket connected successfully");
     _socketSubscription = _webSocketChannel.stream.listen(
-          (dynamic data) => _handleWebSocketMessages(data),
+      (dynamic data) => _handleWebSocketMessages(data),
       onError: (error) {
-            wsState = WebSocketState.error;
-            print("WebSocket error: $error");
-            },
+        wsState = WebSocketState.error;
+        print("WebSocket error: $error");
+      },
       onDone: () {
-            wsState = WebSocketState.disconnected;
-            print("WebSocket closed");
+        wsState = WebSocketState.disconnected;
+        print("WebSocket closed");
       },
     );
   }
 
   void _handleWebSocketMessages(dynamic data) {
     try {
-
       final jsonData = json.decode(data);
 
       // print("*"*50);
@@ -241,11 +252,12 @@ class ChatService extends ChangeNotifier {
       // _messageStreamController.add(Message("random", "Pasha loh", "random", "db15d264-11f1-4c80-9906-b220168aa9bf"));
       // return;
 
-      final message = GetMessageResponse.fromJson(jsonData).toMessage(); // Ensure Message has fromJson()
+      final message = GetMessageResponse.fromJson(jsonData)
+          .toMessage(); // Ensure Message has fromJson()
 
-      print("*"*50);
+      print("*" * 50);
       print("RECEIVED WEBSOCKET MESSAGE");
-      print("*"*50);
+      print("*" * 50);
       _messageStreamController.add(message);
 
       // final chatIndex = chats.indexWhere((c) => c.id == message.chatId);
@@ -259,12 +271,23 @@ class ChatService extends ChangeNotifier {
     }
   }
 
-  Future<void> sendWebSocketMessage(String chatId, String text) async{
+  Future<void> sendWebSocketMessage(String chatId, String text) async {
     final message = WebSocketMessage(text, chatId).toMap();
     _webSocketChannel.sink.add(json.encode(message));
   }
 
-
-
-
+  Future<ImageMetadata> downloadAndSaveFile(GetMessageResponse dto) async {
+    final token = await tokenService.getToken();
+    final Directory appDocDir = await getApplicationDocumentsDirectory();
+    final String savePath = '${appDocDir.path}/${dto.fileUrl!.split('/').last}';
+    final endpoint = "${dto.fileUrl!}";
+    await dio.download(
+      endpoint,
+      savePath,
+      options: Options(headers: {
+        'Authorization': 'Bearer $token',
+      }),
+    );
+    return chatImageService.saveImage(XFile(savePath));
+  }
 }
