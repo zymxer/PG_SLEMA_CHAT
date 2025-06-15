@@ -7,9 +7,9 @@ class GetMessageResponse {
   final String chatUuid;
   final String messageUuid;
   final String timestamp;
-  final String fileName;
-  final String fileType;
-  final String fileUrl;
+  final String? fileName;
+  final String? fileType;
+  final String? fileUrl;
 
   GetMessageResponse(this.text, this.authorUuid, this.chatUuid,
       this.messageUuid, this.timestamp, this.fileName, this.fileType, this.fileUrl);

@@ -11,13 +11,23 @@ class PostMessageRequest {
 
   Future<FormData> toFormData() async {
     final formData = FormData();
-    formData.fields.add(MapEntry('message', text ?? ""));
+
+    // Send message as a separate part using MultipartFile
+    formData.files.add(MapEntry(
+      'message',
+      MultipartFile.fromString(text ?? "Required"),
+    ));
+
     if (file != null) {
       formData.files.add(MapEntry(
-          'file',
-          await MultipartFile.fromFile(file!.path,
-              filename: file!.name.split('/').last)));
+        'file',
+        await MultipartFile.fromFile(
+          file!.path,
+          filename: file!.name.split('/').last,
+        ),
+      ));
     }
+
     return formData;
   }
 }

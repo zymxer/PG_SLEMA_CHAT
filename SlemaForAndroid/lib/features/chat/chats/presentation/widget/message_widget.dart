@@ -45,7 +45,7 @@ class MessageWidgetState extends State<MessageWidget> {
   }
 
   Widget _messageContent() {
-    if (widget.message.imageMetadata == null) {
+    if (widget.message.imageMetadata != null) {
       return SingleImageWidget(
         metadata: widget.message.imageMetadata!,
         thumbnailService: ThumbnailServiceImpl(),

@@ -99,7 +99,7 @@ class ChatController extends ChangeNotifier {
     final (filesMetadata, pickedFiles) = await chatImageService.selectAndAddImagesFromGallery();
     final List<PostMessageResponse> responses = [];
     for(var file in pickedFiles) {
-      responses.add(await chatService.sendMessage(PostMessageRequest(_currentChat, "", file)));
+      responses.add(await chatService.sendMessage(PostMessageRequest(_currentChat, null, file)));
     }
     for (int i = 0; i < responses.length; i++) {
       final response = responses[i];

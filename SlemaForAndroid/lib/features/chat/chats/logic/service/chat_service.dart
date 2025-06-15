@@ -140,15 +140,17 @@ class ChatService extends ChangeNotifier {
   Future<PostMessageResponse> sendMessage(PostMessageRequest request) async{
 
     final String endpoint = "$_baseUrl/${request.chat.id}/messages";
-    final token = await tokenService.getToken();
 
+    final token = await tokenService.getToken();
+    final body = await request.toFormData();
     try {
       final response = await dio.post(
         endpoint,
-        data: await request.toFormData(),
+        data: body,
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
+            'Content-Type': 'multipart/form-data',
           },
         ),
       );
