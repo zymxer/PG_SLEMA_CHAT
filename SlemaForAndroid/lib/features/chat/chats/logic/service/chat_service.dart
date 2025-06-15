@@ -6,9 +6,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pg_slema/features/chat/chats/logic/entity/add_member_request.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/chat.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/chat_member.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/create_chat_request.dart';
+import 'package:pg_slema/features/chat/chats/logic/entity/create_chat_response.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/get_chat_response.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/get_message_response.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/message.dart';
@@ -81,7 +83,7 @@ class ChatService extends ChangeNotifier {
     }
   }
 
-  Future<bool> createChat(CreateChatRequest request) async {
+  Future<CreateChatResponse> createChat(CreateChatRequest request) async {
     final String endpoint = _baseUrl;
     final token = await tokenService.getToken();
 
@@ -98,7 +100,7 @@ class ChatService extends ChangeNotifier {
       );
       switch (response.statusCode) {
         case 200:
-          return true;
+          return CreateChatResponse.fromJson(response.data);
         default:
           throw Exception(
               'Failed to fetch chats. Status code: ${response.statusCode}');
@@ -182,6 +184,34 @@ class ChatService extends ChangeNotifier {
     }
   }
 
+  Future<bool> addChatMember(String chatId, AddMemberRequest request) async{
+    final String endpoint = "$_baseUrl/$chatId/members";
+    final token = await tokenService.getToken();
+
+    try {
+      final response = await dio.post(
+        endpoint,
+        data: request.toJson(),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json'
+          },
+        ),
+      );
+      switch (response.statusCode) {
+        case 201:
+          return true;
+
+        default:
+          throw Exception(
+              'Failed to add chat member. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error during adding chat member: $e');
+    }
+  }
+
   Future<List<ChatMember>> getChatMembers(String chatId) async {
     final String endpoint = "$_baseUrl/$chatId/members";
     final token = await tokenService.getToken();
@@ -199,7 +229,6 @@ class ChatService extends ChangeNotifier {
       switch (response.statusCode) {
         case 200:
           final List<dynamic> data = response.data as List<dynamic>;
-          print(data);
           return data
               .map((jsonMember) => ChatMember.fromJson(jsonMember))
               .toList();

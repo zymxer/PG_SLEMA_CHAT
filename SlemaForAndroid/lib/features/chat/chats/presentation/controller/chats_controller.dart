@@ -29,6 +29,7 @@ class AllChatsController extends ChangeNotifier{
         }
       }
     }
+    notifyListeners();
   }
 
   void connectWebSocket() async {
