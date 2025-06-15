@@ -18,7 +18,6 @@ import com.greedann.chatservice.model.Chat;
 import com.greedann.chatservice.model.Message;
 import com.greedann.chatservice.model.User;
 import com.greedann.chatservice.repository.MessageRepository;
-import com.greedann.chatservice.dto.WebSocketMessage;
 
 @Service
 public class MessageService {
@@ -74,8 +73,7 @@ public class MessageService {
         Message savedMessage = messageRepository.save(newMessage);
         
         try {
-            WebSocketMessage webSocketMessage = new WebSocketMessage(chatId.toString(), message);
-            String messageJson = objectMapper.writeValueAsString(webSocketMessage);
+            String messageJson = objectMapper.writeValueAsString(savedMessage);
             webSocketService.broadcastMessage(chatId, new TextMessage(messageJson), requestUser.getId(), userService);
         } catch (Exception e) {
             System.err.println("Error sending message through WebSocket: " + e.getMessage());
