@@ -23,8 +23,8 @@ class AllChatsController extends ChangeNotifier{
       }
       final members = await chatService.getChatMembers(chat.id);
       for(var member in members) {
-        if(member.user != userService.currentUser!.name) {
-          chat.name = member.user;
+        if(member.user.id != userService.currentUser!.id) {
+          chat.name = member.user.username;
           break;
         }
       }

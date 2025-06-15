@@ -48,7 +48,7 @@ class _UserScreenState extends State<UserScreen> {
                   // TODO Profile pic
                   //images from lib/features/picture/presentation/widget/picture_list.dart
                   Icon(
-                    Icons.telegram,
+                    Icons.account_box,
                     color: Theme.of(context).primaryColor,
                     size: 160,  // TODO check for screens with lower resolution
                   ),

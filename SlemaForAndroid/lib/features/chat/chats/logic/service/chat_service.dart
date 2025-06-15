@@ -199,6 +199,7 @@ class ChatService extends ChangeNotifier {
       switch (response.statusCode) {
         case 200:
           final List<dynamic> data = response.data as List<dynamic>;
+          print(data);
           return data
               .map((jsonMember) => ChatMember.fromJson(jsonMember))
               .toList();
