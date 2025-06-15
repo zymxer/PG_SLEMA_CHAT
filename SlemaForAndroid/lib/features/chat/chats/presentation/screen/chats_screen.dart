@@ -23,6 +23,7 @@ class ChatsScreenState extends State<ChatsScreen> {
   void initState() {
     super.initState();
     Provider.of<AllChatsController>(context, listen: false).fetchChats();
+    Provider.of<AllChatsController>(context, listen: false).connectWebSocket();
   }
 
   @override

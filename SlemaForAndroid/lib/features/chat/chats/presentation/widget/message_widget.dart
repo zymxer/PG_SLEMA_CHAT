@@ -2,6 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/message.dart';
 import 'package:pg_slema/features/chat/user/logic/service/user_service.dart';
+import 'package:pg_slema/features/gallery/logic/entity/image_metadata.dart';
+import 'package:pg_slema/features/gallery/logic/service/thumbnail_service_impl.dart';
+import 'package:pg_slema/features/gallery/presentation/widget/single_image_widget.dart';
 import 'package:provider/provider.dart';
 
 enum MessageType { Received, ReceivedGroup, Sent }
@@ -36,12 +39,23 @@ class MessageWidgetState extends State<MessageWidget> {
       child: Container(
         constraints: const BoxConstraints(maxWidth: 200, minWidth: 100), //todo
         decoration: messageDecoration(type),
-        child: Text(
-          widget.message.content,
-          style: Theme.of(context).textTheme.labelSmall,
-        ),
+        child: _messageContent()
       ),
     );
+  }
+
+  Widget _messageContent() {
+    if (widget.message.imageMetadata == null) {
+      return SingleImageWidget(
+        metadata: widget.message.imageMetadata!,
+        thumbnailService: ThumbnailServiceImpl(),
+      );
+    } else {
+      return Text(
+        widget.message.content,
+        style: Theme.of(context).textTheme.labelSmall,
+      );
+    }
   }
 
   Alignment messageAlignment(MessageType type) {

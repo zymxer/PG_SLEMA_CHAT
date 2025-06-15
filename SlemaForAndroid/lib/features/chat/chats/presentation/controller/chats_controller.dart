@@ -23,21 +23,19 @@ class AllChatsController extends ChangeNotifier{
       }
       final members = await chatService.getChatMembers(chat.id);
       for(var member in members) {
-        if(member.username != userService.currentUser!.name) {
-          chat.name = member.username;
+        if(member.user != userService.currentUser!.name) {
+          chat.name = member.user;
           break;
         }
       }
     }
-    // chatsFuture = service.getAllChats().then((chats){
-    //   allChats = chats;
-    //   for(var chat in allChats) {
-    //     if(chat.isGroup) {
-    //       continue;
-    //     }
-    //     final members = await service.getChatMembers(chat.id);
-    //   }
-    //   return chats;
-    // });
+  }
+
+  void connectWebSocket() async {
+    if(chatService.wsState == WebSocketState.connected ||
+    chatService.wsState == WebSocketState.connecting) {
+      return;
+    }
+    chatService.connectWebSocket();
   }
 }

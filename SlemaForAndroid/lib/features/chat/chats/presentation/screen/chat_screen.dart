@@ -34,7 +34,7 @@ class ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<ChatController>(context);
+    final controller = Provider.of<ChatController>(context, listen: true);
     return Column(children: [
       DefaultAppBar(title: widget.chat.name),
       DefaultBody(

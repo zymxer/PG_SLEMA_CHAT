@@ -20,6 +20,7 @@ import 'package:pg_slema/features/exercises/logic/service/exercise_service.dart'
 import 'package:pg_slema/features/gallery/logic/repository/stored_image_metadata_repository.dart';
 import 'package:pg_slema/features/gallery/logic/repository/shared_preferences_stored_image_metadata_repository.dart';
 import 'package:pg_slema/features/gallery/logic/service/image_service.dart';
+import 'package:pg_slema/features/gallery/logic/service/image_service_chat_impl.dart';
 import 'package:pg_slema/features/gallery/logic/service/image_service_impl.dart';
 import 'package:pg_slema/features/motivation/presentation/controller/motivation_screen_controller.dart';
 import 'package:pg_slema/features/settings/logic/application_info_repository.dart';
@@ -84,7 +85,6 @@ Future<void> main() async {
     applicationInfoRepository: applicationInfoRepository,
   );
 
-  // TODO: The address is only set at the start...
 
   final String devAddress = "10.0.2.2:8080";
   final String prodAddress = "10.0.2.2:8080"; // TODO replace production address
@@ -113,13 +113,16 @@ Future<void> main() async {
   final userService = UserService(dio, tokenService);
   final authService = AuthService(applicationInfoRepository, dio, tokenService, userService, chatMainScreenController);
   final chatService = ChatService(dio, tokenService);
+  final chatImageMetadataRepository =
+  await SharedPreferencesStoredImageMetadataRepository.create();
+  final chatImageService = ImageServiceChatImpl(repository: chatImageMetadataRepository);
 
   // CHAT CONTROLLERS
   final signInController = SignInController(authService, chatMainScreenController);
   final signUpController = SignUpController(authService, chatMainScreenController);
   final addChatController = AddChatController(chatService, userService);
   final allChatsController = AllChatsController(chatService, userService);
-  final chatController = ChatController(chatService, userService);
+  final chatController = ChatController(chatService, userService, chatImageService);
 
   runApp(
     MultiProvider(

@@ -12,8 +12,16 @@ import 'package:pg_slema/features/chat/chats/logic/entity/get_message_response.d
 import 'package:pg_slema/features/chat/chats/logic/entity/message.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/post_message_request.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/post_message_responce.dart';
+import 'package:pg_slema/features/chat/chats/logic/entity/webSocket_message.dart';
 import 'package:pg_slema/utils/token/token_service.dart';
 import 'package:web_socket_channel/io.dart';
+
+enum WebSocketState {
+  disconnected,
+  connecting,
+  connected,
+  error,
+}
 
 class ChatService extends ChangeNotifier {
 
@@ -24,9 +32,10 @@ class ChatService extends ChangeNotifier {
   final String _baseUrl = '/api/chat';  // todo Move to ApplicationInfoRepository
 
   late IOWebSocketChannel _webSocketChannel;
-  StreamSubscription? _socketSubscription;
+  late StreamSubscription _socketSubscription;
   final StreamController<Message> _messageStreamController =
   StreamController<Message>.broadcast();
+  WebSocketState wsState = WebSocketState.disconnected;
 
   Stream<Message> get newMessages => _messageStreamController.stream;
 
@@ -136,11 +145,10 @@ class ChatService extends ChangeNotifier {
     try {
       final response = await dio.post(
         endpoint,
-        data: request.toJson(),
+        data: await request.toFormData(),
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json'
           },
         ),
       );
@@ -192,7 +200,9 @@ class ChatService extends ChangeNotifier {
 
   Future<void> connectWebSocket() async {
     final token = await tokenService.getToken();
-    final uri = Uri.parse('ws://$_baseUrl:8082/ws/chat');
+    final uri = Uri.parse('ws://10.0.2.2:8082/ws/chat');
+
+    wsState = WebSocketState.connecting;
 
     final webSocket = await WebSocket.connect(
       uri.toString(),
@@ -202,29 +212,57 @@ class ChatService extends ChangeNotifier {
     );
 
     _webSocketChannel = IOWebSocketChannel(webSocket);
+    wsState = WebSocketState.connected;
+    print("WebSocket connected successfully");
     _socketSubscription = _webSocketChannel.stream.listen(
           (dynamic data) => _handleWebSocketMessages(data),
-      onError: (error) => print("WebSocket error: $error"),
-      onDone: () => print("WebSocket closed"),
+      onError: (error) {
+            wsState = WebSocketState.error;
+            print("WebSocket error: $error");
+            },
+      onDone: () {
+            wsState = WebSocketState.disconnected;
+            print("WebSocket closed");
+      },
     );
   }
 
   void _handleWebSocketMessages(dynamic data) {
     try {
+
       final jsonData = json.decode(data);
+
+      // print("*"*50);
+      // print("TEST RECEIVED WEBSOCKET MESSAGE");
+      // print("${jsonData}");
+      // print("*"*50);
+      // _messageStreamController.add(Message("random", "Pasha loh", "random", "db15d264-11f1-4c80-9906-b220168aa9bf"));
+      // return;
+
       final message = GetMessageResponse.fromJson(jsonData).toMessage(); // Ensure Message has fromJson()
 
+      print("*"*50);
+      print("RECEIVED WEBSOCKET MESSAGE");
+      print("*"*50);
       _messageStreamController.add(message);
 
-      final chatIndex = chats.indexWhere((c) => c.id == message.chatId);
-      if (chatIndex != -1) {
-        // TODO ADD MESSAGE TO CHAT
-
-        notifyListeners();
-      }
+      // final chatIndex = chats.indexWhere((c) => c.id == message.chatId);
+      // if (chatIndex != -1) {
+      //   // TODO ADD MESSAGE TO CHAT
+      //
+      //   notifyListeners();
+      // }
     } catch (e) {
       print("Error parsing message: $e");
     }
   }
+
+  Future<void> sendWebSocketMessage(String chatId, String text) async{
+    final message = WebSocketMessage(text, chatId).toMap();
+    _webSocketChannel.sink.add(json.encode(message));
+  }
+
+
+
 
 }
