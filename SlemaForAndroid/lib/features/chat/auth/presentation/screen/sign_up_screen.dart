@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:pg_slema/features/chat/auth/presentation/controller/sign_in_controller.dart';
 import 'package:pg_slema/features/chat/auth/presentation/controller/sign_up_controller.dart';
 import 'package:pg_slema/features/chat/auth/presentation/widget/auth_button.dart';
 import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_screen_controller.dart';
@@ -16,10 +14,10 @@ class SignUpScreen extends StatefulWidget {
     super.key,
   });
   @override
-  State<StatefulWidget> createState() => _SignInScreenState();
+  State<StatefulWidget> createState() => _SignUpScreenState();
 }
 
-class _SignInScreenState extends State<SignUpScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -58,12 +56,14 @@ class _SignInScreenState extends State<SignUpScreen> {
                     label: "Hasło",
                     icon: Icons.password,
                     onChanged: (value) => signUpController.password = value,
+                    obscureText: true,
                   ),
                   const SizedBox(height: 20.0),
                   CustomTextFormField(
                     label: "Powtórz hasło",
                     icon: Icons.password,
                     onChanged: (value) => signUpController.password = value,
+                    obscureText: true,
                   ),
                   const SizedBox(height: 20.0),
                   AuthButton(

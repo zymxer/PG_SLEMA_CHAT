@@ -52,6 +52,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     label: "Hasło",
                     icon: Icons.password,
                     onChanged: (value) => controller.password = value,
+                    obscureText: true,
                   ),
                   const SizedBox(height: 20.0),
                   AuthButton(

@@ -6,6 +6,7 @@ class CustomTextFormField extends StatefulWidget {
   final String? initialValue;
   final ValueChanged<String> onChanged;
   final bool isValueRequired;
+  final bool obscureText;
 
   const CustomTextFormField(
       {super.key,
@@ -13,7 +14,8 @@ class CustomTextFormField extends StatefulWidget {
       this.label,
       this.icon,
       this.initialValue,
-      this.isValueRequired = true});
+      this.isValueRequired = true,
+      this.obscureText = false});
 
   @override
   State<CustomTextFormField> createState() => _CustomTextFormFieldState();
@@ -51,6 +53,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       validator: validateInput,
       onChanged: widget.onChanged,
       keyboardType: TextInputType.text,
+      obscureText: widget.obscureText,
       style: TextStyle(
         fontSize: Theme.of(context).textTheme.labelSmall?.fontSize,
         color: Theme.of(context).primaryColor,
