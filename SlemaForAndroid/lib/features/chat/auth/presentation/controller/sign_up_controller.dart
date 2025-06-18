@@ -10,22 +10,26 @@ class SignUpController extends ChangeNotifier {
   String confirmPassword = "";
 
   late RegisterStatus registerStatus;
+
   final AuthService authService;
   final ChatMainScreenController mainScreenController;
 
   SignUpController(this.authService, this.mainScreenController);
 
-  void register() async {
+  Future<String?> register() async {
     try {
-      registerStatus =
-          await authService.registerUser(username, password, email);
-      if (registerStatus.status) {
+      final RegisterStatus status = await authService.registerUser(username, password, email);
+      if (status.status) {
         mainScreenController.navigateTo(ChatMainScreenType.SIGN_IN_SCREEN);
+        return null;
+      } else {
+        return "Rejestracja nie powiodła się z nieznanego powodu.";
       }
     } catch (ex) {
       if (kDebugMode) {
-        print("Register exception: $ex");
+        print("Wyjątek  rejestracji: $ex");
       }
+      return ex.toString().replaceFirst('Wyjątek: ', '');
     }
   }
 }

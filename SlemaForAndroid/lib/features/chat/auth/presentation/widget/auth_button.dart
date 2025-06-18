@@ -40,12 +40,12 @@ class AuthButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultCircularButton(
-        onPressed: _onPressed(context),
+        onPressed: onPressed ?? _onDefaultPressed(context), 
         label: label
     );
   }
 
-  void Function() _onPressed(BuildContext context) {
+  void Function() _onDefaultPressed(BuildContext context) {
     switch (type) {
       case AuthButtonType.SignIn:
         return () => _onSignInButtonPressed(context);

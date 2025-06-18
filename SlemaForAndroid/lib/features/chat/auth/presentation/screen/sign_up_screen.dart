@@ -8,11 +8,10 @@ import 'package:pg_slema/utils/widgets/forms/text_input.dart';
 import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
-
-
   const SignUpScreen({
     super.key,
   });
+
   @override
   State<StatefulWidget> createState() => _SignUpScreenState();
 }
@@ -23,6 +22,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   void initState() {
     super.initState();
+  }
+
+  void _showSnackBar(String message, {Color backgroundColor = Colors.red}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+      ),
+    );
+  }
+
+  void _onRegisterButtonPressed(BuildContext context) async {
+    final signUpController = Provider.of<SignUpController>(context, listen: false);
+
+    if (_formKey.currentState?.validate() ?? false) {
+      String? errorMessage = await signUpController.register();
+
+      if (errorMessage != null) {
+        _showSnackBar(errorMessage.replaceFirst('Wyjątek: ', ''));
+      } else {
+        _showSnackBar('Rejestracja zakończona sukcesem! Możesz się teraz zalogować.', backgroundColor: Colors.green);
+      }
+    }
   }
 
   @override
@@ -44,15 +66,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     label: "Nazwa użytkownika",
                     icon: Icons.account_box,
                     onChanged: (value) => signUpController.username = value,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Proszę podać nazwę użytkownika';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 20.0),
                   CustomTextFormField(
                     label: "Email",
                     icon: Icons.email,
                     onChanged: (value) => signUpController.email = value,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Proszę podać adres email';
+                      }
+                      if (!RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
+                        return 'Proszę podać prawidłowy adres email';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 20.0),
-                  CustomTextFormField(  //TODO *******
+                  CustomTextFormField(
                     label: "Hasło",
                     icon: Icons.password,
                     onChanged: (value) => signUpController.password = value,
@@ -110,6 +147,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     mainScreenController: mainScreenController,
                     type: AuthButtonType.SignUp,
                     isMain: true,
+                    onPressed: () => _onRegisterButtonPressed(context),
                   ),
                   const SizedBox(height: 20.0),
                   AuthButton(

@@ -4,13 +4,12 @@ import com.bitesait.AuthService.DTO.LoginRequest;
 import com.bitesait.AuthService.DTO.LoginResponse;
 import com.bitesait.AuthService.DTO.RegisterRequest;
 import com.bitesait.AuthService.exceptions.EmailAlreadyExistsException;
+import com.bitesait.AuthService.exceptions.InvalidCredentialsException;
 import com.bitesait.AuthService.exceptions.UsernameAlreadyExistsException;
 import com.bitesait.AuthService.models.User;
 import com.bitesait.AuthService.repositories.UserRepository;
 import com.bitesait.AuthService.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -47,10 +46,10 @@ public class AuthService {
         Optional<User> user = userRepository.findByUsername(request.getUsername());
 
         if(user.isEmpty())
-            throw(new UsernameNotFoundException("User not found"));
+            throw(new InvalidCredentialsException("Nie znaleziono użytkownika"));
 
         if(!passwordEncoder.matches(request.getPassword(), user.get().getPassword()))
-            throw new BadCredentialsException("Invalid password");
+            throw new InvalidCredentialsException("Nieprawidłowe hasło");
 
         String token = jwtUtil.generateToken(user.get());
         return new LoginResponse(token);
@@ -58,7 +57,7 @@ public class AuthService {
 
     public String verifyToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new BadCredentialsException("Invalid token. Either empty or without Bearer prefix");
+            throw new InvalidCredentialsException("Nieprawidłowy token. Pusty lub bez prefiksu Bearer");
         }
         String token = authHeader.substring(7); // Remove "Bearer " prefix
 

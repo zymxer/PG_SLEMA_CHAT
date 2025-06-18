@@ -14,17 +14,20 @@ class SignInController extends ChangeNotifier {
 
   SignInController(this.authService, this.mainScreenController);
 
-  void logIn() async{
+  Future<String?> logIn() async {
     try {
-      loginStatus = await authService.loginUser(username, password);
-      if(loginStatus.status) {
+      final LoginStatus status = await authService.loginUser(username, password);
+      if (status.status) {
         mainScreenController.navigateTo(ChatMainScreenType.CHATS_SCREEN);
+        return null;
+      } else {
+        return "Logowanie nie powiodło się z nieznanego powodu.";
       }
-    }
-    catch (ex){
+    } catch (ex) {
       if (kDebugMode) {
-        print("Login exception: $ex");
+        print("Wyjątek logowania: $ex");
       }
+      return ex.toString().replaceFirst('Wyjątek: ', '');
     }
   }
 }
