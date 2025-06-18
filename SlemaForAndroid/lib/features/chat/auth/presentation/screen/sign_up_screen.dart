@@ -32,7 +32,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     return Column(
       children: [
-        DefaultAppBar(title: "Zarejestruj się"),
+        const DefaultAppBar(title: "Zarejestruj się"),
         DefaultBody(
           child: Form(
             key: _formKey,
@@ -57,13 +57,52 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     icon: Icons.password,
                     onChanged: (value) => signUpController.password = value,
                     obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Proszę podać hasło';
+                      }
+                      if (value.length < 6) {
+                        return 'Hasło musi mieć co najmniej 6 znaków';
+                      }
+                      if (!value.contains(RegExp(r'[A-Z]'))) {
+                        return 'Hasło musi zawierać co najmniej jedną dużą literę';
+                      }
+                      if (!value.contains(RegExp(r'[0-9]'))) {
+                        return 'Hasło musi zawierać co najmniej jedną cyfrę';
+                      }
+                      if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+                        return 'Hasło musi zawierać co najmniej jeden znak specjalny';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 20.0),
                   CustomTextFormField(
                     label: "Powtórz hasło",
                     icon: Icons.password,
-                    onChanged: (value) => signUpController.password = value,
+                    onChanged: (value) => signUpController.confirmPassword = value,
                     obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Proszę powtórzyć hasło';
+                      }
+                      if (value.length < 6) {
+                        return 'Hasło musi mieć co najmniej 6 znaków';
+                      }
+                      if (!value.contains(RegExp(r'[A-Z]'))) {
+                        return 'Hasło musi zawierać co najmniej jedną dużą literę';
+                      }
+                      if (!value.contains(RegExp(r'[0-9]'))) {
+                        return 'Hasło musi zawierać co najmniej jedną cyfrę';
+                      }
+                      if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+                        return 'Hasło musi zawierać co najmniej jeden znak specjalny';
+                      }
+                      if (value != signUpController.password) {
+                        return 'Hasła nie pasują do siebie';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 20.0),
                   AuthButton(

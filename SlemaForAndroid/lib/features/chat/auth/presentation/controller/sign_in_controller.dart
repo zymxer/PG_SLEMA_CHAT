@@ -1,10 +1,7 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pg_slema/features/chat/auth/logic/entity/login_status.dart';
 import 'package:pg_slema/features/chat/auth/logic/service/auth_service.dart';
-import 'package:pg_slema/features/chat/auth/presentation/screen/sign_up_screen.dart';
 import 'package:pg_slema/features/chat/main/presentation/controller/chat_main_screen_controller.dart';
-import 'package:provider/provider.dart';
 
 class SignInController extends ChangeNotifier {
   String username = "";
@@ -25,7 +22,9 @@ class SignInController extends ChangeNotifier {
       }
     }
     catch (ex){
-      print("Login exception: $ex");
+      if (kDebugMode) {
+        print("Login exception: $ex");
+      }
     }
   }
 }
