@@ -41,10 +41,12 @@ class AddChatController extends ChangeNotifier {
         selected.length > 1? 1: 0,
         interlocutor.name)
     );
-    final members = await chatService.getChatMembers(chat.id);
-    for(int i = 0; i < selected.length; i++) {
-      //todo role selection
-      await chatService.addChatMember(chat.id, AddMemberRequest(selected[i].name, "interlocutor"));
+    if(selected.length > 1) {
+      final members = await chatService.getChatMembers(chat.id);
+      for(int i = 0; i < selected.length; i++) {
+        //todo role selection
+        await chatService.addChatMember(chat.id, AddMemberRequest(selected[i].name, "interlocutor"));
+      }
     }
     selected = [];
     final members2 = await chatService.getChatMembers(chat.id);

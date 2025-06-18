@@ -49,15 +49,16 @@ class ChatController extends ChangeNotifier {
 
   // Todo
   void _updateMessageList(Message message) {
-    final chatId = message.chatId;
+    final chat = chatService.getChat(message.chatId);
 
     print("*"*50);
     print("HANDLING WEBSOCKET MESSAGE");
     print("*"*50);
-    messagesMap[chatId]!.add(message);
+    messagesMap.putIfAbsent(chat, () => []);
+    messagesMap[chat]!.add(message);
 
-    if (_currentChat.id == chatId) {
-      messages = messagesMap[chatId]!;
+    if (_currentChat.id == chat.id) {
+      messages = messagesMap[chat]!;
       notifyListeners();
     }
   }
@@ -75,21 +76,21 @@ class ChatController extends ChangeNotifier {
     if(_message.isEmpty) {
       return;
     }
+    // try {
+    //   final result = await chatService.sendMessage(PostMessageRequest(_currentChat, _message, null));
+    //   messages.add(Message(result.messageUuid, _message, userService.currentUser!.id, _currentChat.id, null));
+    //   message = "";
+    //   textEditingController.clear();
+    //   notifyListeners();
+    // }
+    // todo use when WebSocket works
     try {
-      final result = await chatService.sendMessage(PostMessageRequest(_currentChat, _message, null));
-      messages.add(Message(result.messageUuid, _message, userService.currentUser!.id, _currentChat.id, null));
+      await chatService.sendWebSocketMessage(_currentChat.id, _message);
+      messages.add(Message("messageIdUnused", _message, userService.currentUser!.id, _currentChat.id, null));
       message = "";
       textEditingController.clear();
       notifyListeners();
     }
-    // todo use when WebSocket works
-    // try {
-    //   await chatService.sendWebSocketMessage(_currentChat.id, _message);
-    //   //messages.add(Message(result.messageUuid, _message, userService.currentUser!.id, _currentChat.id));
-    //   //message = "";
-    //   textEditingController.clear();
-    //   notifyListeners();
-    // }
     catch (e) {
       throw Exception('Error during sending a message: $e');
     }

@@ -17,6 +17,7 @@ import 'package:pg_slema/features/chat/chats/logic/entity/message.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/post_message_request.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/post_message_responce.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/webSocket_message.dart';
+import 'package:pg_slema/features/chat/chats/logic/entity/web_socket_message_response.dart';
 import 'package:pg_slema/features/gallery/logic/entity/image_metadata.dart';
 import 'package:pg_slema/features/gallery/logic/service/image_service_chat_impl.dart';
 import 'package:pg_slema/utils/token/token_service.dart';
@@ -81,6 +82,10 @@ class ChatService extends ChangeNotifier {
     } catch (e) {
       throw Exception('Error during fetching chats: $e');
     }
+  }
+
+  Chat getChat(String chatId) {
+    return chats.where((chat) => chat.id == chatId).single;
   }
 
   Future<CreateChatResponse> createChat(CreateChatRequest request) async {
@@ -282,13 +287,14 @@ class ChatService extends ChangeNotifier {
       // _messageStreamController.add(Message("random", "Pasha loh", "random", "db15d264-11f1-4c80-9906-b220168aa9bf"));
       // return;
 
-      final message = GetMessageResponse.fromJson(jsonData)
+      final message = WebSocketMessageResponse.fromJson(jsonData)
           .toMessage(); // Ensure Message has fromJson()
 
       print("*" * 50);
       print("RECEIVED WEBSOCKET MESSAGE");
       print("*" * 50);
       _messageStreamController.add(message);
+      notifyListeners();
 
       // final chatIndex = chats.indexWhere((c) => c.id == message.chatId);
       // if (chatIndex != -1) {
