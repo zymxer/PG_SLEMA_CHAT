@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pg_slema/features/chat/chats/presentation/controller/add_chat_controller.dart';
 import 'package:pg_slema/features/chat/chats/presentation/widget/user_entry_widget.dart';
 import 'package:pg_slema/utils/widgets/appbars/default_appbar.dart';
-import 'package:pg_slema/utils/widgets/default_body/default_body_with_multiple_floating_action_buttons.dart';
+import 'package:pg_slema/utils/widgets/default_body/default_body.dart';
 import 'package:pg_slema/utils/widgets/forms/text_input.dart';
 import 'package:provider/provider.dart';
 
@@ -14,13 +14,22 @@ class AddChatScreen extends StatefulWidget {
 }
 
 class AddChatScreenState extends State<AddChatScreen> {
+  late TextEditingController _groupChatNameController;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AddChatController>(context, listen: false).fetchUsers();
     });
-    print("In init state");
+    _groupChatNameController = TextEditingController();
+    print("In init state of AddChatScreenState");
+  }
+
+  @override
+  void dispose() {
+    _groupChatNameController.dispose();
+    super.dispose();
   }
 
   @override
@@ -29,19 +38,28 @@ class AddChatScreenState extends State<AddChatScreen> {
 
     return Scaffold(
       appBar: DefaultAppBar(title: "Dodaj czat"),
-      body: DefaultBodyWithMultipleFloatingActionButtons(
-        buttons: [
-          (() async {
-            bool success = await controller.createChat();
-            if (success) {
-              Navigator.pop(context);
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Nie udało się stworzyć chat.')),
-              );
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          String? chatNameForGroup;
+          if (controller.selected.length > 1) {
+            chatNameForGroup = _groupChatNameController.text;
+            if (chatNameForGroup.trim().isEmpty) {
+              chatNameForGroup = "Grupowy chat";
             }
-          }, Icons.check)
-        ],
+          }
+
+          bool success = await controller.createChat(chatNameForGroup);
+          if (success) {
+            Navigator.pop(context);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Nie udało się stworzyć chat.')),
+            );
+          }
+        },
+        child: const Icon(Icons.check),
+      ),
+      body: DefaultBody(
         child: Column(children: [
           const SizedBox(height: 20.0),
           CustomTextFormField(
@@ -50,6 +68,23 @@ class AddChatScreenState extends State<AddChatScreen> {
             icon: Icons.search,
             onChanged: (value) => controller.search = value,
           ),
+
+          if (controller.selected.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0, bottom: 20.0),
+              child: TextFormField(
+                controller: _groupChatNameController,
+                style: Theme.of(context).textTheme.headlineMedium,
+                decoration: InputDecoration(
+                  labelText: "Nazwa chatu grupowego",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.group),
+                ),
+                onChanged: (value) {
+                },
+              ),
+            ),
+
           Expanded(
               child: ListView.separated(
                 shrinkWrap: true,
