@@ -111,7 +111,10 @@ class ChatController extends ChangeNotifier {
       userService.currentUser!.id,
       _currentChat!.id,
       null,
-      fileUrl: null, fileName: null, fileType: null,
+      fileUrl: null,
+      fileName: null,
+      fileType: null,
+      senderUsername: userService.currentUser!.name,
     );
 
     messagesMap.putIfAbsent(_currentChat!, () => []);
@@ -173,6 +176,7 @@ class ChatController extends ChangeNotifier {
         fileUrl: metadataItem.path,
         fileName: metadataItem.filename,
         fileType: metadataItem.fileType,
+        senderUsername: userService.currentUser!.name,
       );
       messagesMap[_currentChat!]!.add(tempAttachmentMessage);
       tempMessages.add(tempAttachmentMessage);

@@ -98,6 +98,7 @@ class WebSocketMessageResponse {
       fileUrl: fileUrl,
       fileName: fileName,
       fileType: fileType,
+      senderUsername: sender.username,
     );
   }
 }

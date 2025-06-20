@@ -44,7 +44,7 @@ class AddChatScreenState extends State<AddChatScreen> {
           if (controller.selected.length > 1) {
             chatNameForGroup = _groupChatNameController.text;
             if (chatNameForGroup.trim().isEmpty) {
-              chatNameForGroup = "Grupowy chat";
+              chatNameForGroup = "Czat grupowy";
             }
           }
 

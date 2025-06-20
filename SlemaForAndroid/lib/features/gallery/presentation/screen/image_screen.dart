@@ -15,7 +15,8 @@ class ImageScreen extends StatelessWidget with Logger {
     super.key,
     required this.metadata,
   }) {
-    future = File(metadata.filename).readAsBytes();
+    future = File(metadata.path).readAsBytes();
+    logger.debug("ImageScreen: Attempting to read file from path: ${metadata.path}");
   }
 
   @override
@@ -23,27 +24,40 @@ class ImageScreen extends StatelessWidget with Logger {
     return Column(
       children: [
         const DefaultAppBar(title: "Zdjęcie"),
-        DefaultBody(
-          mainWidgetsPaddingHorizontal: 0.0,
-          child: FutureBuilder(
-            future: future,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const CircularProgressIndicator();
-              }
-              final data = snapshot.data!;
-              logger.debug("Data: ${data.lengthInBytes}");
+        Expanded(
+          child: DefaultBody(
+            mainWidgetsPaddingHorizontal: 0.0,
+            child: FutureBuilder<Uint8List>(
+              future: future,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              final image = Image.memory(
-                data,
-                fit: BoxFit.fitWidth,
-              );
-              return InteractiveViewer(
-                minScale: 0.01,
-                maxScale: 10.0,
-                child: image,
-              );
-            },
+                if (snapshot.hasError) {
+                  logger.error("ImageScreen: Error loading image from ${metadata.path}: ${snapshot.error}");
+                  return Center(child: Text("Error loading image: ${snapshot.error}"));
+                }
+
+                if (snapshot.data == null) {
+                  logger.warning("ImageScreen: No image data received for ${metadata.path}.");
+                  return const Center(child: Text("No image data."));
+                }
+
+                final data = snapshot.data!;
+                logger.debug("ImageScreen: Image data loaded. Size: ${data.lengthInBytes} bytes");
+
+                final image = Image.memory(
+                  data,
+                  fit: BoxFit.contain,
+                );
+                return InteractiveViewer(
+                  minScale: 0.1,
+                  maxScale: 10.0,
+                  child: image,
+                );
+              },
+            ),
           ),
         ),
       ],

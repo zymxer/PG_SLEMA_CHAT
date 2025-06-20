@@ -5,6 +5,7 @@ class Message {
   final String content;
   final String senderId;
   final String chatId;
+  final String senderUsername;
   ImageMetadata? imageMetadata;
   final String? fileUrl;
   final String? fileName;
@@ -16,10 +17,11 @@ class Message {
       this.senderId,
       this.chatId,
       this.imageMetadata,
-          {
+      {
         this.fileUrl,
         this.fileName,
         this.fileType,
+        required this.senderUsername,
       }
       );
 
@@ -32,6 +34,7 @@ class Message {
     String? fileUrl,
     String? fileName,
     String? fileType,
+    String? senderUsername,
   }) {
     return Message(
       id ?? this.id,
@@ -42,6 +45,7 @@ class Message {
       fileUrl: fileUrl ?? this.fileUrl,
       fileName: fileName ?? this.fileName,
       fileType: fileType ?? this.fileType,
+      senderUsername: senderUsername ?? this.senderUsername,
     );
   }
 }

@@ -6,6 +6,13 @@ class User {
 
   User(this.id, this.name);
 
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      json['id'] as String,
+      json['name'] as String,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

@@ -5,6 +5,7 @@ class PostMessageResponse {
   final String content;
   final String senderId;
   final String chatId;
+  final String senderUsername;
   final String timestamp;
   final bool isRead;
   final String? fileName;
@@ -16,6 +17,7 @@ class PostMessageResponse {
     required this.content,
     required this.senderId,
     required this.chatId,
+    required this.senderUsername,
     required this.timestamp,
     required this.isRead,
     this.fileName,
@@ -30,6 +32,7 @@ class PostMessageResponse {
       senderId: json['sender']['id'] as String,
       chatId: json['chat']['id'] as String,
       timestamp: json['timestamp'] as String,
+      senderUsername: json['sender']['username'] as String,
       isRead: json['isRead'] as bool,
       fileName: json['fileName'] as String?,
       fileType: json['fileType'] as String?,
@@ -47,6 +50,7 @@ class PostMessageResponse {
       fileUrl: fileUrl,
       fileName: fileName,
       fileType: fileType,
+      senderUsername: senderUsername,
     );
   }
 }

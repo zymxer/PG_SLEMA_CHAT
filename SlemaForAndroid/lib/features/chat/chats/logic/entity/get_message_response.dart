@@ -71,6 +71,7 @@ class GetMessageResponse {
       fileUrl: fileUrl,
       fileName: fileName,
       fileType: fileType,
+      senderUsername: sender.username,
     );
   }
 }

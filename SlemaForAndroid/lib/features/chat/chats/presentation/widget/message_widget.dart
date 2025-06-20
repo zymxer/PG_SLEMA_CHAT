@@ -37,9 +37,25 @@ class MessageWidgetState extends State<MessageWidget> {
     return Align(
       alignment: messageAlignment(type),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 200, minWidth: 100), //todo
+        constraints: const BoxConstraints(maxWidth: 200, minWidth: 0),
         decoration: messageDecoration(type),
-        child: _messageContent()
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: type == MessageType.Sent ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              if (type == MessageType.Received || type == MessageType.ReceivedGroup)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Text(
+                    widget.message.senderUsername,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              _messageContent(),
+            ],
+          ),
+        ),
       ),
     );
   }
