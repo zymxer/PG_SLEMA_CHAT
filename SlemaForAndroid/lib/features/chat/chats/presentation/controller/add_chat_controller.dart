@@ -31,9 +31,10 @@ class AddChatController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void createChat() async {
+  Future<bool> createChat([String? groupChatName]) async {
     if (selected.isEmpty) {
-      return;
+      print("AddChatController: Add chat members.");
+      return false;
     }
 
     String chatName;
@@ -49,12 +50,10 @@ class AddChatController extends ChangeNotifier {
       interlocutorUsername = interlocutor.name;
       memberIds = null;
     } else {
-      chatName = "Group chat";
+      chatName = groupChatName != null && groupChatName.isNotEmpty ? groupChatName : "Group chat";
       isGroup = true;
       interlocutorUsername = null;
-
       memberIds = selected.map((user) => user.id).toList();
-
       memberIds.remove(userService.currentUser!.id);
     }
 
@@ -67,13 +66,14 @@ class AddChatController extends ChangeNotifier {
       );
 
       final CreateChatResponse response = await chatService.createChat(request);
+      print("AddChatController: Chat is created: ${response.id}");
 
       selected = [];
       notifyListeners();
-
+      return true;
 
     } catch (e) {
-
+      return false;
     }
   }
 
@@ -98,7 +98,7 @@ class AddChatController extends ChangeNotifier {
       notifyListeners();
       return users;
     }).catchError((e) {
-
+      print('AddChatController: Error while loading users: $e');
       return <User>[];
     });
   }
