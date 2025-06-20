@@ -1,5 +1,6 @@
 package com.greedann.chatservice.service;
 
+import com.greedann.chatservice.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,6 +13,7 @@ import com.greedann.chatservice.repository.UserRepository;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -39,11 +41,17 @@ public class UserService {
 
         String username = response.getBody();
         System.out.println("verified user" + username);
-        return userRepository.findByUsername(username).get();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found after token verification: " + username));
     }
 
     public User getUser(String username) {
-        return userRepository.findByUsername(username).get();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+    }
+
+    public List<User> getUsersByIds(List<UUID> userIds) {
+        return userRepository.findAllById(userIds);
     }
 
     public List<User> getAllUsers() {
@@ -53,5 +61,4 @@ public class UserService {
     public boolean isAdmin(User user) {
         return user.getIsAdmin();
     }
-
 }

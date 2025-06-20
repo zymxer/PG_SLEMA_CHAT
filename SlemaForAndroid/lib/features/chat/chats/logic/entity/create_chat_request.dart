@@ -1,15 +1,22 @@
 class CreateChatRequest {
   final String name;
-  final int isGroup;
-  final String interlocutorUsername;
-  CreateChatRequest(this.name, this.isGroup, this.interlocutorUsername);
+  final bool isGroup;
+  final String? interlocutorUsername;
+  final List<String>? memberIds;
+
+  CreateChatRequest(
+      this.name,
+      this.isGroup,
+      this.interlocutorUsername,
+      {this.memberIds}
+      );
 
   Map<String, dynamic> toJson() {
     return {
       'name': name,
       'isGroup': isGroup,
-      'interlocutorUsername': interlocutorUsername
+      if (interlocutorUsername != null) 'interlocutorUsername': interlocutorUsername,
+      if (memberIds != null && memberIds!.isNotEmpty) 'memberIds': memberIds,
     };
   }
-
 }

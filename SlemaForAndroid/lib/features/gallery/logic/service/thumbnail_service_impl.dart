@@ -1,62 +1,77 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart' as material;
 import 'package:path_provider/path_provider.dart';
 import 'package:pg_slema/features/gallery/logic/service/thumbnail_service.dart';
 import 'package:pg_slema/utils/log/logger_mixin.dart';
-import 'package:image/image.dart';
+import 'package:image/image.dart' as img_lib;
 
 class ThumbnailServiceImpl extends ThumbnailService with Logger {
   @override
-  Future<material.Image?> loadThumbnail(
+  Future<material.ImageProvider?> loadThumbnail(
       String id, String imagePath, int width) async {
-    // if (id != "5663bc83-c4a6-48d8-8b41-324a105f6f42") {
-    //   return Future.value(null);
-    // }
 
     final directory = await getTemporaryDirectory();
     final thumbnailPath = "${directory.path}/_thumbnails/$id.png";
 
-    final thumbnailA = await _loadThumbnail(thumbnailPath);
-    if (thumbnailA != null) {
-      return thumbnailA;
+
+    final thumbnailProviderA = await _loadThumbnailProvider(thumbnailPath);
+    if (thumbnailProviderA != null) {
+      return thumbnailProviderA;
     }
 
-    return _generateThumbnail(imagePath, thumbnailPath, width);
+
+    return _generateThumbnailProvider(imagePath, thumbnailPath, width);
   }
 
-  Future<material.Image?> _loadThumbnail(String thumbnailPath) async {
+
+  Future<material.ImageProvider?> _loadThumbnailProvider(String thumbnailPath) async {
     try {
       final file = File(thumbnailPath);
-      final bytes = await file.readAsBytes();
-      return material.Image.memory(bytes);
+      if (await file.exists()) {
+        return material.FileImage(file);
+      }
+      return null;
     } catch (ex) {
-      logger.debug("Could not load thumbnail from path: $thumbnailPath");
+      logger.warning("Could not load thumbnail from path: $thumbnailPath. Exception: $ex");
       return null;
     }
   }
 
-  Future<material.Image?> _generateThumbnail(
+
+  Future<material.ImageProvider?> _generateThumbnailProvider(
       String imagePath, String thumbnailPath, int width) async {
     try {
       final imageFile = File(imagePath);
+      if (!await imageFile.exists()) {
+        logger.warning("Original image file not found at path: $imagePath for thumbnail generation.");
+        return null;
+      }
+
       final imageBytes = await imageFile.readAsBytes();
-      final image = decodeImage(imageBytes);
-      final resizedImage = copyResize(
-        image!,
+      final image = img_lib.decodeImage(imageBytes);
+
+      if (image == null) {
+        logger.warning("Could not decode image from bytes for path: $imagePath");
+        return null;
+      }
+
+      final resizedImage = img_lib.copyResize(
+        image,
         width: width,
       );
-      final thumbnailImage = encodePng(resizedImage);
+      final thumbnailImageBytes = img_lib.encodePng(resizedImage);
+
       final thumbnailFile = File(thumbnailPath);
       await thumbnailFile.create(recursive: true);
-      await thumbnailFile.writeAsBytes(thumbnailImage);
+      await thumbnailFile.writeAsBytes(thumbnailImageBytes);
 
       logger.debug(
           "Generated thumbnail for image \"$imagePath\" at \"$thumbnailPath\"");
 
-      return _loadThumbnail(thumbnailPath);
+
+      return material.FileImage(thumbnailFile);
     } catch (ex) {
-      logger.debug("Could not generate thumbnail for image $imagePath");
+      logger.error("Could not generate thumbnail for image $imagePath. Exception: $ex");
       return null;
     }
   }

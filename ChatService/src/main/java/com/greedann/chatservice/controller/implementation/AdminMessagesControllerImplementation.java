@@ -34,7 +34,7 @@ public class AdminMessagesControllerImplementation implements AdminMessagesContr
         List<Message> sentMessages = chats.stream()
                 .map(chat -> messageService.sendMessage(chat.getId(), message.getText(), message.getFile(),
                         authorizationHeader))
-                .collect(Collectors.toList());
+                .toList();
 
         List<MessageDto> messageDtos = sentMessages.stream()
                 .map(MessageDto::fromMessage)

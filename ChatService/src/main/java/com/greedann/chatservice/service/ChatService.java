@@ -5,8 +5,13 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.WebSocketSession;
 
 import com.greedann.chatservice.dto.CreateOrUpdateChat;
 import com.greedann.chatservice.model.Chat;
@@ -19,51 +24,109 @@ import com.greedann.chatservice.repository.ChatRepository;
 import com.greedann.chatservice.repository.ChatMemberRepository;
 
 @Service
+@RequiredArgsConstructor
 public class ChatService {
+
     private final UserService userService;
     private final ChatMemberRepository chatMemberRepository;
     private final ChatRepository chatRepository;
+    private final WebSocketService webSocketService;
 
-    public ChatService(UserService userService, ChatMemberRepository chatMemberRepository,
-            ChatRepository chatRepository) {
-        this.userService = userService;
-        this.chatMemberRepository = chatMemberRepository;
-        this.chatRepository = chatRepository;
-    }
+    public Chat createChat(CreateOrUpdateChat chatDto, String authorizationHeader) {
+        System.out.println("[CHAT_SERVICE] INFO: Attempting to create chat.");
+        System.out.println("[CHAT_SERVICE] DEBUG: Chat DTO Details -> Name: '" + chatDto.getName() + "', IsGroup: " + chatDto.getIsGroup() + ", InterlocutorUsername: '" + chatDto.getInterlocutorUsername() + "', Member IDs: " + chatDto.getMemberIds());
 
-    public Chat createChat(CreateOrUpdateChat chat, String authorizationHeader) {
-        String chatName = chat.getName();
-        Boolean isGroup = chat.getIsGroup();
-        String interlocutorUsername = chat.getInterlocutorUsername();
+        String chatName = chatDto.getName();
+        Boolean isGroup = chatDto.getIsGroup();
+        String interlocutorUsername = chatDto.getInterlocutorUsername();
+        List<UUID> memberIds = chatDto.getMemberIds();
+
+        Chat newChat;
+        Set<User> membersToRegisterSet = new HashSet<>(); // NEW: Re-initialize for every call
+
+        User requestUser = userService.getRequestUser(authorizationHeader);
+        System.out.println("[CHAT_SERVICE] DEBUG: Requesting user for chat creation: " + requestUser.getUsername() + " (ID: " + requestUser.getId() + ")");
+
         if (isGroup) {
-            Chat newChat = Chat.builder().name(chatName).isGroup(true).createdAt(LocalDateTime.now()).build();
+            System.out.println("[CHAT_SERVICE] INFO: Creating a GROUP chat.");
+            newChat = Chat.builder().name(chatName).isGroup(true).createdAt(LocalDateTime.now()).build();
             Chat savedChat = chatRepository.save(newChat);
-            User requestUser = userService.getRequestUser(authorizationHeader);
-            ChatMember chatMember = ChatMember.builder().chat(savedChat).user(requestUser).role("creator")
+            System.out.println("[CHAT_SERVICE] DEBUG: Group chat saved with ID: " + savedChat.getId() + ", Name: " + savedChat.getName());
+
+            ChatMember creatorMember = ChatMember.builder().chat(savedChat).user(requestUser).role("creator")
                     .joinedAt(LocalDateTime.now()).build();
-            chatMemberRepository.save(chatMember);
-            return newChat;
-        } else {
-            Chat newChat = Chat.builder().name(chatName).isGroup(false).createdAt(LocalDateTime.now()).build();
+            chatMemberRepository.save(creatorMember);
+            membersToRegisterSet.add(requestUser);
+            System.out.println("[CHAT_SERVICE] DEBUG: Creator '" + requestUser.getUsername() + "' added to group chat members.");
+
+            if (memberIds != null && !memberIds.isEmpty()) {
+                System.out.println("[CHAT_SERVICE] DEBUG: Processing " + memberIds.size() + " additional member IDs for group chat.");
+                List<User> groupMembers = userService.getUsersByIds(memberIds);
+                for (User member : groupMembers) {
+                    if (!member.equals(requestUser)) {
+                        ChatMember groupChatMember = ChatMember.builder().chat(savedChat).user(member).role("member")
+                                .joinedAt(LocalDateTime.now()).build();
+                        chatMemberRepository.save(groupChatMember);
+                        membersToRegisterSet.add(member);
+                        System.out.println("[CHAT_SERVICE] DEBUG: Member '" + member.getUsername() + "' added to group chat.");
+                    } else {
+                        System.out.println("[CHAT_SERVICE] DEBUG: Skipping creator ID '" + member.getUsername() + "' from additional members list to avoid duplicate.");
+                    }
+                }
+            } else {
+                System.out.println("[CHAT_SERVICE] INFO: No additional member IDs provided for group chat, only creator added.");
+            }
+            newChat = savedChat;
+        } else { // Handle private (non-group) chat creation
+            System.out.println("[CHAT_SERVICE] INFO: Creating a PRIVATE chat.");
+            newChat = Chat.builder().name(chatName).isGroup(false).createdAt(LocalDateTime.now()).build();
             try {
                 User interlocutor = userService.getUser(interlocutorUsername);
-                User requestUser = userService.getRequestUser(authorizationHeader);
+                System.out.println("[CHAT_SERVICE] DEBUG: Interlocutor for private chat: '" + interlocutor.getUsername() + "' (ID: " + interlocutor.getId() + ")");
+
                 if (interlocutor.equals(requestUser)) {
+                    System.err.println("[CHAT_SERVICE] ERROR: Attempted to create private chat with self. Request user: " + requestUser.getUsername());
                     throw new ResourceNotFoundException(
                             "You can't add yourself to this chat, because you are already interlocutor");
                 }
+
+                chatRepository.save(newChat);
+                System.out.println("[CHAT_SERVICE] DEBUG: Private chat saved with ID: " + newChat.getId() + ", Name: '" + newChat.getName() + "'");
+
                 ChatMember chatMember1 = ChatMember.builder().chat(newChat).user(interlocutor).role("interlocutor")
                         .joinedAt(LocalDateTime.now()).build();
                 ChatMember chatMember2 = ChatMember.builder().chat(newChat).user(requestUser).role("creator")
                         .joinedAt(LocalDateTime.now()).build();
-                chatRepository.save(newChat);
+
                 chatMemberRepository.save(chatMember1);
                 chatMemberRepository.save(chatMember2);
+                System.out.println("[CHAT_SERVICE] DEBUG: Added '" + interlocutor.getUsername() + "' and '" + requestUser.getUsername() + "' to private chat members.");
+
+                membersToRegisterSet.add(requestUser);
+                membersToRegisterSet.add(interlocutor);
+
             } catch (NoSuchElementException e) {
-                throw new ResourceNotFoundException("Contact not found: " + interlocutorUsername); // change exception
+                System.err.println("[CHAT_SERVICE] ERROR: Interlocutor not found: '" + interlocutorUsername + "'. Exception: " + e.getMessage());
+                throw new ResourceNotFoundException("Contact not found: " + interlocutorUsername);
             }
-            return newChat;
         }
+
+        System.out.println("[CHAT_SERVICE] INFO: Attempting to register WebSocket sessions for chat " + newChat.getId() + " with " + membersToRegisterSet.size() + " members.");
+        // Log the final members before iterating
+        System.out.println("[CHAT_SERVICE] DEBUG: Final members for WebSocket registration: " + membersToRegisterSet.stream().map(User::getUsername).collect(Collectors.joining(", ")));
+
+        for (User member : membersToRegisterSet) {
+            System.out.println("[CHAT_SERVICE] DEBUG: Checking active session for user: '" + member.getUsername() + "' (ID: " + member.getId() + ")");
+            WebSocketSession activeSession = webSocketService.getSessionByUserId(member.getId());
+            if (activeSession != null && activeSession.isOpen()) {
+                webSocketService.addSession(newChat.getId(), activeSession);
+                System.out.println("[CHAT_SERVICE] INFO: Session for user '" + member.getUsername() + "' (" + activeSession.getId() + ") ADDED to new chat: " + newChat.getId());
+            } else {
+                System.out.println("[CHAT_SERVICE] WARN: User '" + member.getUsername() + "' (ID: " + member.getId() + ") does not have an active WebSocket session or it's closed. Session NOT REGISTERED for chat " + newChat.getId());
+            }
+        }
+        System.out.println("[CHAT_SERVICE] INFO: Chat creation process finished for chat: " + newChat.getId() + ". Members processed (final list for logging): " + membersToRegisterSet.stream().map(User::getUsername).collect(Collectors.joining(", ")));
+        return newChat;
     }
 
     public List<Chat> getAllChats(String authorizationHeader) {
@@ -93,7 +156,6 @@ public class ChatService {
             throw new AuthenticationException("Only creators can delete this chat");
         }
 
-        // Not good but mne vpadlu perepisywat' model chat & chatMember
         List<ChatMember> chatMembers = chatMemberRepository.findAllByChat(chat);
         chatMemberRepository.deleteAll(chatMembers);
 
@@ -130,39 +192,41 @@ public class ChatService {
 
         List<User> allUsers = userService.getAllUsers();
         List<Chat> broadcastChats = new ArrayList<>();
+        System.out.println("[CHAT_SERVICE] INFO: Starting getBroadcastChats for admin '" + requestUser.getUsername() + "'. Total users: " + allUsers.size());
 
         for (User user : allUsers) {
             if (!user.equals(requestUser)) {
-                // check if the user has chat with the requestUser
+                System.out.println("[CHAT_SERVICE] DEBUG: Checking broadcast chat with user: '" + user.getUsername() + "'");
                 List<Chat> userChats = getAllChatsForUser(user.getUsername());
-                System.out.println("User chats: " + userChats.size());
+                System.out.println("[CHAT_SERVICE] DEBUG: User '" + user.getUsername() + "' has " + userChats.size() + " existing chats.");
                 Chat broadCastChat = null;
                 for (Chat chat : userChats) {
                     List<User> chatMembers = getChatMembers(chat.getId());
                     if (chatMembers.contains(requestUser)) {
                         broadCastChat = chat;
-                        break; // Exit loop if chat exists
+                        System.out.println("[CHAT_SERVICE] DEBUG: Found existing broadcast chat " + chat.getId() + " with '" + user.getUsername() + "'.");
+                        break;
                     }
                 }
                 if (broadCastChat == null) {
-                    // If chat does not exist, create a new one
-                    CreateOrUpdateChat newChat = CreateOrUpdateChat.builder()
-                            .name("Administrator")
-                            .isGroup(false)
+                    System.out.println("[CHAT_SERVICE] INFO: No existing broadcast chat found with '" + user.getUsername() + "'. Creating new one.");
+                    CreateOrUpdateChat newChatDto = CreateOrUpdateChat.builder()
+                            .name("Administrator") // Default name for admin-created private chats
+                            .isGroup(false) // This is always a private chat in this context
                             .interlocutorUsername(user.getUsername())
                             .build();
-                    broadCastChat = createChat(newChat, authorizationHeader);
+                    broadCastChat = createChat(newChatDto, authorizationHeader); // RECURSIVE CALL to createChat
                     System.out.println(
-                            "New chat created between: " + requestUser.getUsername() + " and " + user.getUsername());
+                            "[CHAT_SERVICE] INFO: New chat " + broadCastChat.getId() + " created between: '" + requestUser.getUsername() + "' and '" + user.getUsername() + "'.");
                 }
                 broadcastChats.add(broadCastChat);
             }
         }
-
+        System.out.println("[CHAT_SERVICE] INFO: getBroadcastChats finished. Total broadcast chats to send message: " + broadcastChats.size());
         return broadcastChats;
     }
 
-    public Chat updateChat(UUID id, CreateOrUpdateChat chat, String authorizationHeader) {
+    public void updateChat(UUID id, CreateOrUpdateChat chat, String authorizationHeader) {
         User requestUser = userService.getRequestUser(authorizationHeader);
         Chat existingChat = chatRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Chat " + id + " not found"));
@@ -176,6 +240,6 @@ public class ChatService {
 
         existingChat.setName(chat.getName());
         existingChat.setIsGroup(chat.getIsGroup());
-        return chatRepository.save(existingChat);
+        chatRepository.save(existingChat);
     }
 }

@@ -1,6 +1,6 @@
 import 'dart:io';
-
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pg_slema/features/gallery/logic/entity/image_metadata.dart';
 import 'package:pg_slema/features/gallery/logic/entity/stored_image_metadata.dart';
 import 'package:pg_slema/features/gallery/logic/repository/stored_image_metadata_repository.dart';
@@ -10,29 +10,60 @@ import 'package:uuid/uuid.dart';
 
 class ImageServiceImpl with Logger implements ImageService {
   final picker = ImagePicker();
-
   final StoredImageMetadataRepository repository;
 
   ImageServiceImpl({
     required this.repository,
   });
 
+  Future<String> _getAppImagesDirectory() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final appImagesPath = '${directory.path}/app_images';
+    await Directory(appImagesPath).create(recursive: true);
+    return appImagesPath;
+  }
+
+  String _getMimeTypeFromPath(String path) {
+    final lowerCasePath = path.toLowerCase();
+    if (lowerCasePath.endsWith('.jpg') || lowerCasePath.endsWith('.jpeg')) {
+      return 'image/jpeg';
+    } else if (lowerCasePath.endsWith('.png')) {
+      return 'image/png';
+    } else if (lowerCasePath.endsWith('.gif')) {
+      return 'image/gif';
+    } else if (lowerCasePath.endsWith('.bmp')) {
+      return 'image/bmp';
+    } else if (lowerCasePath.endsWith('.webp')) {
+      return 'image/webp';
+    }
+    logger.warning("Could not determine specific image MIME type for $path. Defaulting to image/jpeg.");
+    return 'image/jpeg';
+  }
+
   @override
   Future<List<ImageMetadata>> loadImageData() async {
     final storedImageMetadata = await repository.getAll();
     final imageFutures = storedImageMetadata.map((item) async {
       try {
-        final stat = await FileStat.stat(item.filename);
+        final file = File(item.filename);
+        if (!await file.exists()) {
+          logger.warning("Image file not found on disk: ${item.filename}");
+          return null;
+        }
+        final stat = await file.stat();
+        final fileType = item.fileType;
 
         logger.debug(
             "Reading stat for file \"${item.filename}\": date = ${stat.changed}");
         return ImageMetadata(
           id: item.id,
-          filename: item.filename,
+          filename: item.filename.split(Platform.pathSeparator).last,
+          path: item.filename,
           date: stat.changed,
+          fileType: fileType,
         );
       } catch (ex) {
-        logger.warning("Could not stat file ${item.filename}");
+        logger.warning("Could not stat file ${item.filename} for ImageMetadata: $ex");
         return null;
       }
     });
@@ -47,26 +78,48 @@ class ImageServiceImpl with Logger implements ImageService {
   @override
   Future selectAndAddImageFromGallery() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    return _saveImage(pickedFile);
+    return _processAndSaveImage(pickedFile);
   }
 
   @override
   Future createAndAddImageViaCamera() async {
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
-    return _saveImage(pickedFile);
+    return _processAndSaveImage(pickedFile);
   }
 
-  Future _saveImage(XFile? pickedFile) async {
+  Future<ImageMetadata?> _processAndSaveImage(XFile? pickedFile) async {
     if (pickedFile == null) {
-      logger.debug("Image not selected.");
-      return;
+      logger.debug("Image not selected (in _processAndSaveImage).");
+      return null;
     }
 
-    final metadata = StoredImageMetadata(
-      id: const Uuid().v4(),
-      filename: pickedFile.path,
-    );
+    final appImagesPath = await _getAppImagesDirectory();
+    final newFileName = '${const Uuid().v4()}_${pickedFile.name}';
+    final newFilePath = '$appImagesPath/$newFileName';
 
-    await repository.save(metadata);
+    try {
+      final savedFile = await File(pickedFile.path).copy(newFilePath);
+      logger.debug("Image copied to permanent storage: ${savedFile.path}");
+
+      final determinedFileType = pickedFile.mimeType ?? _getMimeTypeFromPath(pickedFile.name);
+      final metadata = StoredImageMetadata(
+        id: const Uuid().v4(),
+        filename: savedFile.path,
+        fileType: determinedFileType,
+      );
+      await repository.save(metadata);
+      logger.debug("Image metadata saved to repository: ${metadata.filename}");
+
+      return ImageMetadata(
+        id: metadata.id,
+        filename: pickedFile.name,
+        path: savedFile.path,
+        date: (await savedFile.stat()).changed,
+        fileType: determinedFileType,
+      );
+    } catch (e) {
+      logger.error("Error copying/saving image from ${pickedFile.path} to $newFilePath: $e");
+      return null;
+    }
   }
 }

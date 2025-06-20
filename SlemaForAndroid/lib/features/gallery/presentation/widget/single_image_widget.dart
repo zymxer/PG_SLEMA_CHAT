@@ -22,16 +22,22 @@ class _SingleImageWidgetState extends State<SingleImageWidget> with Logger {
   static const int imageWidth = 80;
   static const int imageHeight = 100;
 
-  late Future<Image?> thumbnailFuture;
+  late Future<ImageProvider?> thumbnailFuture;
 
   @override
   void initState() {
     super.initState();
-    thumbnailFuture = widget.thumbnailService.loadThumbnail(
-      widget.metadata.id,
-      widget.metadata.filename,
-      imageWidth,
-    );
+    if (widget.metadata.path.isNotEmpty) {
+      thumbnailFuture = widget.thumbnailService.loadThumbnail(
+        widget.metadata.id,
+        widget.metadata.path,
+        imageWidth,
+      );
+    } else {
+      // If path is somehow empty, create an error future
+      logger.error("ImageMetadata path is empty for ID: ${widget.metadata.id}. Cannot load thumbnail.");
+      thumbnailFuture = Future.error("Empty path provided for thumbnail.");
+    }
   }
 
   @override
@@ -43,7 +49,7 @@ class _SingleImageWidgetState extends State<SingleImageWidget> with Logger {
         child: SizedBox(
           width: imageWidth.toDouble(),
           height: imageHeight.toDouble(),
-          child: FutureBuilder(
+          child: FutureBuilder<ImageProvider?>(
             future: thumbnailFuture,
             builder: _futureBuilder,
           ),
@@ -52,17 +58,31 @@ class _SingleImageWidgetState extends State<SingleImageWidget> with Logger {
     );
   }
 
-  Widget _futureBuilder(BuildContext context, AsyncSnapshot<Image?> snapshot) {
+  Widget _futureBuilder(BuildContext context, AsyncSnapshot<ImageProvider?> snapshot) {
     if (snapshot.connectionState != ConnectionState.done) {
-      return const CircularProgressIndicator();
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (snapshot.hasError) {
+      logger.error("Error loading thumbnail for ${widget.metadata.path}: ${snapshot.error}");
+      return const Center(child: Text("Error loading image."));
     }
 
     if (snapshot.data == null) {
-      logger.error("Failed loading image: ${widget.metadata.filename}");
-      return const Text("Failed loading image.");
+      logger.warning("No thumbnail data for ${widget.metadata.path}. Displaying placeholder.");
+      return const Center(child: Icon(Icons.broken_image));
     }
 
-    return snapshot.data!;
+    return Image(
+      image: snapshot.data!,
+      fit: BoxFit.cover,
+      width: imageWidth.toDouble(),
+      height: imageHeight.toDouble(),
+      errorBuilder: (context, error, stackTrace) {
+        logger.error("Failed to render Image widget for ${widget.metadata.path}: $error");
+        return const Center(child: Icon(Icons.error));
+      },
+    );
   }
 
   void _onTapped(BuildContext context) {

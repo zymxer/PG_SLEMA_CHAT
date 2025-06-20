@@ -26,4 +26,4 @@ logging:
 
 jwt:
   secret: 5f4e4a3c1e1e7b1f91408eace934ad76d6fa1bc6d97f829ef1f3c9c3b850ffb8
-  expiration: 12000000
+  expiration: 99999999999999

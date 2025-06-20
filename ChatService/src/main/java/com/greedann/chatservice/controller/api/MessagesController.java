@@ -16,17 +16,17 @@ import com.greedann.chatservice.model.Message;
 public interface MessagesController {
 
     @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<?> addMessageWithFile(
-        @PathVariable UUID chatId,
-        @RequestPart(value = "message") String message,
-        @RequestPart(value = "file", required = false) MultipartFile file,
-        @RequestHeader("Authorization") String authorizationHeader);
+    public ResponseEntity<Message> addMessageWithFile( // Change to Message
+                                                       @PathVariable UUID chatId,
+                                                       @RequestPart(value = "message", required = false) String message, // message is optional for files
+                                                       @RequestPart(value = "file", required = false) MultipartFile file,
+                                                       @RequestHeader("Authorization") String authorizationHeader);
 
     @PostMapping(consumes = {"application/json"})
-    public ResponseEntity<?> addMessage(
-        @PathVariable UUID chatId,
-        @RequestBody SendedMessage message,
-        @RequestHeader("Authorization") String authorizationHeader);
+    public ResponseEntity<Message> addMessage( // Change to Message
+                                               @PathVariable UUID chatId,
+                                               @RequestBody SendedMessage message,
+                                               @RequestHeader("Authorization") String authorizationHeader);
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -37,5 +37,5 @@ public interface MessagesController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<Message> updateMessage(@PathVariable UUID chatId, @PathVariable UUID id,
-            @RequestBody Message message, @RequestHeader("Authorization") String authorizationHeader);
+                                                 @RequestBody Message message, @RequestHeader("Authorization") String authorizationHeader);
 }
