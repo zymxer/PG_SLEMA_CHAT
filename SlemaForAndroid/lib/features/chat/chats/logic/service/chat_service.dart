@@ -1,9 +1,11 @@
+
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'; 
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/add_member_request.dart';
@@ -17,11 +19,12 @@ import 'package:pg_slema/features/chat/chats/logic/entity/message.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/post_message_request.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/post_message_responce.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/webSocket_message.dart';
+import 'package:pg_slema/features/chat/chats/logic/entity/web_socket_message_response.dart'; 
 import 'package:pg_slema/features/gallery/logic/entity/image_metadata.dart';
 import 'package:pg_slema/features/gallery/logic/service/image_service_chat_impl.dart';
 import 'package:pg_slema/utils/token/token_service.dart';
 import 'package:web_socket_channel/io.dart';
-import 'package:collection/collection.dart';
+import 'package:collection/collection.dart'; 
 
 enum WebSocketState {
   disconnected,
@@ -43,6 +46,10 @@ class ChatService extends ChangeNotifier {
   final StreamController<Message> _messageStreamController =
   StreamController<Message>.broadcast();
 
+  
+  final StreamController<void> _requestChatListUpdateController = StreamController<void>.broadcast();
+  Stream<void> get requestChatListUpdateStream => _requestChatListUpdateController.stream;
+
   WebSocketState _wsState = WebSocketState.disconnected;
 
   WebSocketState get wsState => _wsState;
@@ -55,11 +62,11 @@ class ChatService extends ChangeNotifier {
 
   Stream<Message> get newMessages => _messageStreamController.stream;
 
-  List<Chat> chats = [];
+  List<Chat> chats = []; 
 
   ChatService(this.dio, this.tokenService, this.chatImageService) {
-    // Optionally: Add LogInterceptor for Dio to see all HTTP requests
-    // dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+    
+    
   }
 
   Future<List<Chat>> getAllChats() async {
@@ -82,8 +89,8 @@ class ChatService extends ChangeNotifier {
           final new_chats = data
               .map((jsonChat) => GetChatResponse.fromJson(jsonChat).toChat())
               .toList();
-          chats = new_chats;
-          notifyListeners();
+          chats = new_chats; 
+          notifyListeners(); 
           return chats;
 
         default:
@@ -120,6 +127,7 @@ class ChatService extends ChangeNotifier {
       );
       switch (response.statusCode) {
         case 200:
+          _triggerChatListUpdate(); 
           return CreateChatResponse.fromJson(response.data);
         default:
           throw Exception(
@@ -152,20 +160,17 @@ class ChatService extends ChangeNotifier {
               .map((jsonMessage) => GetMessageResponse.fromJson(jsonMessage))
               .toList();
           List<Message> messages = [];
-          // Load savedImages asynchronously first
           final savedImages = (await chatImageService.loadImageData()).toList();
 
           for (int i = 0; i < dtos.length; i++) {
             GetMessageResponse currentDto = dtos[i];
 
-            // Prepend base URL for network file URLs if they are relative
             if (currentDto.fileUrl != null && !currentDto.fileUrl!.startsWith('http')) {
               currentDto = currentDto.copyWith(fileUrl: _backendBaseUrl + currentDto.fileUrl!);
             }
 
             Message message = currentDto.toMessage();
 
-            // If it's an image message, check if it's already downloaded
             if (message.fileUrl != null) {
               final filenameFromUrl = message.fileUrl!.split('/').last;
 
@@ -248,6 +253,7 @@ class ChatService extends ChangeNotifier {
     }
   }
 
+  
   Future<List<ChatMember>> getChatMembers(String chatId) async {
     final String endpoint = "$_backendBaseUrl$_chatApiBaseUrl/$chatId/members";
     final token = await tokenService.getToken();
@@ -277,6 +283,7 @@ class ChatService extends ChangeNotifier {
       throw Exception('Error during fetching chat members: $e');
     }
   }
+  
 
   Future<void> connectWebSocket() async {
     setWsState(WebSocketState.connecting);
@@ -287,7 +294,7 @@ class ChatService extends ChangeNotifier {
       return;
     }
 
-    final wsUri = Uri.parse('ws://10.0.2.2:8082/ws/chat'); // WebSocket URI is often different from HTTP API base URL
+    final wsUri = Uri.parse('ws://10.0.2.2:8082/ws/chat');
 
     try {
       final webSocket = await WebSocket.connect(
@@ -338,22 +345,31 @@ class ChatService extends ChangeNotifier {
       print("FLUTTER: Received raw WebSocket data: $data");
       print("FLUTTER: Decoded JSON data: $jsonData");
 
+      
+      if (jsonData is Map<String, dynamic> && jsonData.containsKey('type') && jsonData['type'] is String) {
+        String notificationType = jsonData['type'] as String;
+        if (notificationType == 'CHAT_CREATED' || notificationType == 'CHAT_UPDATED' || notificationType == 'CHAT_DELETED') {
+          _triggerChatListUpdate(); 
+          return; 
+        }
+      }
+
       GetMessageResponse dto = GetMessageResponse.fromJson(jsonData);
 
-      // Prepend base URL for network file URLs if they are relative
       if (dto.fileUrl != null && !dto.fileUrl!.startsWith('http')) {
         dto = dto.copyWith(fileUrl: _backendBaseUrl + dto.fileUrl!);
       }
 
       Message message = dto.toMessage();
 
-      // If it's an image message, download and attach ImageMetadata
+      
       if (message.fileUrl != null) {
         _loadImageMetadataAndAddMessage(message, dto);
         return;
       }
 
-      _messageStreamController.add(message); // Add non-image message directly
+      _internalUpdateMessageListFromStream(message);
+
     } catch (e) {
     }
   }
@@ -362,7 +378,7 @@ class ChatService extends ChangeNotifier {
     try {
       final filenameFromUrl = initialMessage.fileUrl!.split('/').last;
 
-      // This is inefficient, consider optimizing by checking a local cache without reloading all
+      
       final savedImages = await chatImageService.loadImageData();
 
       final existingMetadata = savedImages.firstWhereOrNull((entry) => entry.filename == filenameFromUrl);
@@ -372,11 +388,11 @@ class ChatService extends ChangeNotifier {
       if (existingMetadata != null) {
         finalMetadata = existingMetadata;
       } else {
-        // Download and save it if not existing
+        
         finalMetadata = await downloadAndSaveFile(dto);
       }
 
-      // Update the message with the final metadata and add to stream
+      
       final updatedMessage = initialMessage.copyWith(imageMetadata: finalMetadata);
       _messageStreamController.add(updatedMessage);
     } catch (e) {
@@ -418,9 +434,86 @@ class ChatService extends ChangeNotifier {
     ));
   }
 
+  
+  
+  
+  Future<void> deleteChat(String chatId, String token) async { 
+    final String endpoint = "$_backendBaseUrl$_chatApiBaseUrl/$chatId";
+    
+    
+
+    
+    print("ChatService: Attempting to delete chat $chatId");
+    print("ChatService: Sending token: $token"); 
+
+    try {
+      final response = await dio.delete(
+        endpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token', 
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        print("ChatService: Chat $chatId deleted successfully on backend.");
+        _triggerChatListUpdate(); 
+      } else {
+        
+        throw Exception('Failed to delete chat. Status code: ${response.statusCode}');
+      }
+    } on DioException catch (e) { 
+      if (e.response != null) {
+        print('ChatService: DioError response data: ${e.response?.data}');
+        print('ChatService: DioError response headers: ${e.response?.headers}');
+        print('ChatService: DioError response status code: ${e.response?.statusCode}');
+        if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
+          throw Exception('AuthenticationException: У вас нет прав для выполнения этого действия. Status: ${e.response?.statusCode}');
+        }
+      }
+      throw Exception('Error during chat deletion: ${e.message}');
+    } catch (e) {
+      throw Exception('An unexpected error occurred during chat deletion: $e');
+    }
+  }
+  
+
+
+  
+  void _internalUpdateMessageListFromStream(Message message) async {
+    final bool chatExistsLocally = chats.any((chat) => chat.id == message.chatId);
+
+    if (!chatExistsLocally) {
+      print("ChatService: Received message for unknown chat ID ${message.chatId}. Triggering chat list update.");
+      _triggerChatListUpdate(); 
+    }
+
+    final String displayContent = (message.content == "Required") ? "" : message.content;
+    final Message correctedMessage = message.copyWith(content: displayContent);
+
+    _messageStreamController.add(correctedMessage);
+  }
+  
+
+  void _triggerChatListUpdate() {
+    _requestChatListUpdateController.add(null);
+  }
+
+  void removeChatLocally(String chatId) {
+    
+    final initialLength = chats.length;
+    chats.removeWhere((c) => c.id == chatId);
+    if (chats.length < initialLength) {
+      
+      notifyListeners(); 
+    }
+    print("ChatService: Chat $chatId removed locally. New chat count: ${chats.length}");
+  }
+
   @override
   void dispose() {
     _messageStreamController.close();
+    _requestChatListUpdateController.close(); 
     disconnectWebSocket();
     super.dispose();
   }
