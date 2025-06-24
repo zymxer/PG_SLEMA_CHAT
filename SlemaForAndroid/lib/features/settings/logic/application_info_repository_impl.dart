@@ -7,9 +7,11 @@ import 'package:pg_slema/utils/log/logger_mixin.dart';
 class ApplicationInfoRepositoryImpl extends ApplicationInfoRepository
     with Logger {
   static const String serverAddressKey = "serverAddress";
+  static const String chatServiceAddressKey = "chatServiceAddress";
   static const String developerModeKey = "developerMode";
 
   late String serverAddress;
+  late String chatServiceAddress;
   late String version;
   late String buildNumber;
   late bool developerMode;
@@ -27,6 +29,18 @@ class ApplicationInfoRepositoryImpl extends ApplicationInfoRepository
     logger.debug("Setting server address: $value");
     serverAddress = value;
     SharedPreferencesConnector.setString(serverAddressKey, value);
+  }
+
+  @override
+  String getChatServiceAddress() {
+    return chatServiceAddress;
+  }
+
+  @override
+  void setChatServiceAddress(String value) {
+    logger.debug("Setting Chat service address: $value");
+    chatServiceAddress = value;
+    SharedPreferencesConnector.setString(chatServiceAddressKey, value);
   }
 
   @override
@@ -58,7 +72,11 @@ class ApplicationInfoRepositoryImpl extends ApplicationInfoRepository
 
     self.serverAddress = await SharedPreferencesConnector.getString(
       serverAddressKey,
-      "127.0.0.1",
+      "",
+    );
+    self.chatServiceAddress = await SharedPreferencesConnector.getString(
+      chatServiceAddressKey,
+      "",
     );
     self.version = packageInfo.version;
     self.buildNumber = packageInfo.buildNumber;

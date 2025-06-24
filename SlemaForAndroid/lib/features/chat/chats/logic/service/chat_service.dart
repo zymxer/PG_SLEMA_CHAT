@@ -22,6 +22,7 @@ import 'package:pg_slema/features/chat/chats/logic/entity/webSocket_message.dart
 import 'package:pg_slema/features/chat/chats/logic/entity/web_socket_message_response.dart'; 
 import 'package:pg_slema/features/gallery/logic/entity/image_metadata.dart';
 import 'package:pg_slema/features/gallery/logic/service/image_service_chat_impl.dart';
+import 'package:pg_slema/features/settings/logic/application_info_repository.dart';
 import 'package:pg_slema/utils/token/token_service.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:collection/collection.dart'; 
@@ -37,8 +38,9 @@ class ChatService extends ChangeNotifier {
   final Dio dio;
   final TokenService tokenService;
   final ImageServiceChatImpl chatImageService;
+  final ApplicationInfoRepository applicationInfoRepository;
 
-  final String _backendBaseUrl = 'http://10.0.2.2:8082';
+  late String _backendBaseUrl;// = 'http://10.0.2.2:8082';
   final String _chatApiBaseUrl = '/api/chat';
 
   late IOWebSocketChannel _webSocketChannel;
@@ -64,9 +66,9 @@ class ChatService extends ChangeNotifier {
 
   List<Chat> chats = []; 
 
-  ChatService(this.dio, this.tokenService, this.chatImageService) {
-    
-    
+  ChatService(this.dio, this.tokenService, this.chatImageService, this.applicationInfoRepository) {
+    _backendBaseUrl = applicationInfoRepository.getChatServiceAddress();
+    _backendBaseUrl = "http://$_backendBaseUrl";
   }
 
   Future<List<Chat>> getAllChats() async {

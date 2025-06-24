@@ -47,11 +47,6 @@ import 'package:loggy/loggy.dart';
 
 Future<void> main() async {
 
-  // TODO: fix about app
-  // TODO: replace with applicationInfoService
-  await dotenv.load(fileName: "assets/configs/config.dev");
-  //User.currentUser = await UserService().getCurrentUser();
-
   Loggy.initLoggy(
     logPrinter: const LoggerPrinter(),
   );
@@ -88,16 +83,24 @@ Future<void> main() async {
 
   final String devAddress = "10.0.2.2:8080";
   final String prodAddress = "10.0.2.2:8080"; // TODO replace production address
+  final String chatServiceAddress = "10.0.2.2:8082"; // Todo remove when WebSocket works via gateway
 
   final logger = Loggy<Logger>("main");
   final dio = Dio();
   applicationInfoRepository.setDeveloperMode(true);
-  applicationInfoRepository.setServerAddress(
-      applicationInfoRepository.isDeveloperMode()? devAddress : prodAddress
-  );
+
+  if(applicationInfoRepository.getServerAddress().isEmpty) {
+    applicationInfoRepository.setServerAddress(
+        applicationInfoRepository.isDeveloperMode()? devAddress : prodAddress
+    );
+  }
+  if(applicationInfoRepository.getChatServiceAddress().isEmpty) {
+    applicationInfoRepository.setChatServiceAddress(chatServiceAddress);
+  }
   final address = applicationInfoRepository.getServerAddress();
   final httpAddress = "http://$address";
   try {
+    //Todo server address is only set once and doesn't refresh on change
     dio.options.baseUrl = httpAddress;
     logger.debug("Correctly set base URL to $httpAddress");
   } catch (ex) {
@@ -114,7 +117,7 @@ Future<void> main() async {
   final tokenService = TokenService();
   final userService = UserService(dio, tokenService);
   final authService = AuthService(applicationInfoRepository, dio, tokenService, userService, chatMainScreenController);
-  final chatService = ChatService(dio, tokenService, chatImageService);
+  final chatService = ChatService(dio, tokenService, chatImageService, applicationInfoRepository);
 
   // CHAT CONTROLLERS
   final signInController = SignInController(authService, chatMainScreenController);

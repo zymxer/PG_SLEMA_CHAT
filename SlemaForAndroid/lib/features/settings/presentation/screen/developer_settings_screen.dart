@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:pg_slema/features/settings/presentation/widget/change_chat_service_ip_server_text.dart';
 import 'package:pg_slema/features/settings/presentation/widget/change_server_ip_server_text.dart';
 import 'package:pg_slema/features/settings/presentation/widget/disable_developer_mode_setting_button.dart';
 import 'package:pg_slema/features/settings/presentation/widget/remove_assessments_setting_button.dart';
@@ -30,6 +31,7 @@ class DeveloperSettingsScreenState extends State<DeveloperSettingsScreen>
                 RemoveAssessmentsSettingButton(),
                 RemoveExercisesSettingButton(),
                 ChangeServerAddressSettingText(),
+                ChangeChatServiceAddressSettingText(),
                 DisableDeveloperModeSettingButton(),
               ],
             ),
