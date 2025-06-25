@@ -1,0 +1,50 @@
+networks:
+  custom-network:
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: postgress
+    environment:
+      POSTGRES_DB: slemaDB
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminadmin
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - custom-network
+  auth-service:
+    image:  aliaksandrshydlouski/slema-auth-service:0.04
+#    build: ./AuthService
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/slemaDB
+    depends_on:
+      - postgres
+    networks:
+      - custom-network
+  gateway-service:
+    image: aliaksandrshydlouski/slema-gateway-service:0.04
+#    build: ./GatewayService
+    ports:
+      - "8080:8080"
+    networks:
+      - custom-network
+  chat-service:
+    image: aliaksandrshydlouski/slema-chat-service:0.04
+#    build: ./ChatService
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/slemaDB
+      - SERVICE_AUTH_URL=http://gateway-service:8080/auth
+    networks:
+      - custom-network
+
+
+volumes:
+  postgres_data:
