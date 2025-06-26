@@ -26,14 +26,14 @@ class MessageWidgetState extends State<MessageWidget> {
   @override
   void initState() {
     super.initState();
-    type = widget.message.senderId ==
-            Provider.of<UserService>(context, listen: false).currentUser!.id
-        ? MessageType.Sent
-        : MessageType.Received;
   }
 
   @override
   Widget build(BuildContext context) {
+    type = widget.message.senderId ==
+        Provider.of<UserService>(context).currentUser!.id
+        ? MessageType.Sent
+        : MessageType.Received;
     return Align(
       alignment: messageAlignment(type),
       child: Container(
