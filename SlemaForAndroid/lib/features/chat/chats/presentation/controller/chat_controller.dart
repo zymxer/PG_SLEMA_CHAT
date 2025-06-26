@@ -55,7 +55,7 @@ class ChatController extends ChangeNotifier {
     });
   }
 
-  void _updateMessageList(Message message) {
+  void _updateMessageList(Message message) async{
     final incomingMessageChat = chatService.getChat(message.chatId);
 
     print("*" * 50);

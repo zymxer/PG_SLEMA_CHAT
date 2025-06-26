@@ -117,7 +117,7 @@ Future<void> main() async {
   final tokenService = TokenService();
   final userService = UserService(dio, tokenService);
   final authService = AuthService(applicationInfoRepository, dio, tokenService, userService, chatMainScreenController);
-  final chatService = ChatService(dio, tokenService, chatImageService, applicationInfoRepository);
+  final chatService = ChatService(dio, tokenService, chatImageService, applicationInfoRepository, userService);
 
   // CHAT CONTROLLERS
   final signInController = SignInController(authService, chatMainScreenController);

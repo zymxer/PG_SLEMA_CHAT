@@ -24,12 +24,18 @@ class ChatScreen extends StatefulWidget {
 }
 
 class ChatScreenState extends State<ChatScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    Provider.of<ChatController>(context, listen: false).currentChat = widget.chat;
-    Provider.of<ChatController>(context, listen: false)
-        .fetchMessages();
+    Provider.of<ChatController>(context, listen: false).currentChat =
+        widget.chat;
+    Provider.of<ChatController>(context, listen: false).fetchMessages();
+  }
+
+  void _scrollToBottom() {
+    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
 
   @override
@@ -42,6 +48,7 @@ class ChatScreenState extends State<ChatScreen> {
           const SizedBox(height: 5),
           Expanded(
               child: ListView.separated(
+            controller: _scrollController,
             shrinkWrap: true,
             itemCount: controller.messages.length,
             itemBuilder: (context, index) {
@@ -63,14 +70,15 @@ class ChatScreenState extends State<ChatScreen> {
             label: "Type a message",
             postfixIcon: controller.inputState == ChatInputState.Message
                 ? Icons.send_outlined
-                : Icons.attachment_outlined, // Attachment icon: Icons.attach_file
-            onPostfixPressed: () { controller.onPostfixPressed(); },
-
+                : Icons
+                    .attachment_outlined, // Attachment icon: Icons.attach_file
+            onPostfixPressed: () {
+              controller.onPostfixPressed();
+            },
           ),
           const SizedBox(height: 20),
         ]),
       ),
     ]);
   }
-
 }

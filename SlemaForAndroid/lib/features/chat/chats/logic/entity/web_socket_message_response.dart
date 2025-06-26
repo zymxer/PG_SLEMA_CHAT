@@ -62,29 +62,53 @@ class WebSocketMessageResponse {
   final String? fileType;
   final String? fileUrl;
 
-  WebSocketMessageResponse(
-      this.id,
-      this.chat,
-      this.sender,
-      this.content,
-      this.timestamp,
-      this.isRead,
-      this.fileName,
-      this.fileType,
-      this.fileUrl,
-      );
+  WebSocketMessageResponse({
+    required this.id,
+    required this.chat,
+    required this.sender,
+    required this.content,
+    required this.timestamp,
+    required this.isRead,
+    this.fileName,
+    this.fileType,
+    this.fileUrl,
+  });
 
   factory WebSocketMessageResponse.fromJson(Map<String, dynamic> json) {
     return WebSocketMessageResponse(
-      json['id'] as String,
-      WebSocketChat.fromJson(json['chat'] as Map<String, dynamic>),
-      MessageSender.fromJson(json['sender'] as Map<String, dynamic>),
-      json['content'] as String,
-      json['timestamp'] as String,
-      json['isRead'] as bool,
-      json['fileName'] as String?,
-      json['fileType'] as String?,
-      json['fileUrl'] as String?,
+      id: json['id'] as String,
+      chat: WebSocketChat.fromJson(json['chat'] as Map<String, dynamic>),
+      sender: MessageSender.fromJson(json['sender'] as Map<String, dynamic>),
+      content: json['content'] as String,
+      timestamp: json['timestamp'] as String,
+      isRead: json['isRead'] as bool,
+      fileName: json['fileName'] as String?,
+      fileType: json['fileType'] as String?,
+      fileUrl: json['fileUrl'] as String?,
+    );
+  }
+
+  WebSocketMessageResponse copyWith({
+    String? id,
+    WebSocketChat? chat,
+    MessageSender? sender,
+    String? content,
+    String? timestamp,
+    bool? isRead,
+    String? fileName,
+    String? fileType,
+    String? fileUrl,
+  }) {
+    return WebSocketMessageResponse(
+      id: id ?? this.id,
+      chat: chat ?? this.chat,
+      sender: sender ?? this.sender,
+      content: content ?? this.content,
+      timestamp: timestamp ?? this.timestamp,
+      isRead: isRead ?? this.isRead,
+      fileName: fileName ?? this.fileName,
+      fileType: fileType ?? this.fileType,
+      fileUrl: fileUrl ?? this.fileUrl,
     );
   }
 

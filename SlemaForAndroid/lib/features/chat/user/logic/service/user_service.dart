@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -13,6 +14,8 @@ class UserService extends ChangeNotifier {
   final TokenService tokenService;
   final String _baseUrl = '/api/user';
   User? currentUser;
+
+  List<User> _cachedUsers = [];
 
   UserService(this.dio, this.tokenService);
 
@@ -38,9 +41,10 @@ class UserService extends ChangeNotifier {
       switch(response.statusCode) {
         case 200:
           final List<dynamic> data = response.data as List<dynamic>;
-          return data.map(
+          _cachedUsers = data.map(
                   (jsonUser) => UserDto.fromJson(jsonUser).toUser()
           ).toList();
+          return _cachedUsers;
 
         default:
           throw Exception('Failed to fetch users: ${response.statusCode}');
@@ -85,6 +89,10 @@ class UserService extends ChangeNotifier {
 
   //todo implement in backend
   Future<User> getById(String id) async {
+    User? cached = _cachedUsers.firstWhereOrNull( (user) => user.id == id);
+    if(cached != null) {
+      return cached;
+    }
     var list = await getAllUsers();
     return list.firstWhere( (user) => user.id == id);
   }

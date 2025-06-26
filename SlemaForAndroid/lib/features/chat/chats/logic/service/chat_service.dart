@@ -19,7 +19,9 @@ import 'package:pg_slema/features/chat/chats/logic/entity/message.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/post_message_request.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/post_message_responce.dart';
 import 'package:pg_slema/features/chat/chats/logic/entity/webSocket_message.dart';
-import 'package:pg_slema/features/chat/chats/logic/entity/web_socket_message_response.dart'; 
+import 'package:pg_slema/features/chat/chats/logic/entity/web_socket_message_response.dart';
+import 'package:pg_slema/features/chat/user/logic/entity/user.dart';
+import 'package:pg_slema/features/chat/user/logic/service/user_service.dart';
 import 'package:pg_slema/features/gallery/logic/entity/image_metadata.dart';
 import 'package:pg_slema/features/gallery/logic/service/image_service_chat_impl.dart';
 import 'package:pg_slema/features/settings/logic/application_info_repository.dart';
@@ -39,7 +41,9 @@ class ChatService extends ChangeNotifier {
   final TokenService tokenService;
   final ImageServiceChatImpl chatImageService;
   final ApplicationInfoRepository applicationInfoRepository;
+  final UserService userService;
 
+  late String _chatServiceAddress;
   late String _backendBaseUrl;// = 'http://10.0.2.2:8082';
   final String _chatApiBaseUrl = '/api/chat';
 
@@ -66,9 +70,10 @@ class ChatService extends ChangeNotifier {
 
   List<Chat> chats = []; 
 
-  ChatService(this.dio, this.tokenService, this.chatImageService, this.applicationInfoRepository) {
-    _backendBaseUrl = applicationInfoRepository.getChatServiceAddress();
-    _backendBaseUrl = "http://$_backendBaseUrl";
+  ChatService(this.dio, this.tokenService, this.chatImageService, this.applicationInfoRepository,
+      this.userService) {
+    _chatServiceAddress = applicationInfoRepository.getChatServiceAddress();
+    _backendBaseUrl = "http://$_chatServiceAddress";
   }
 
   Future<List<Chat>> getAllChats() async {
@@ -171,7 +176,9 @@ class ChatService extends ChangeNotifier {
               currentDto = currentDto.copyWith(fileUrl: _backendBaseUrl + currentDto.fileUrl!);
             }
 
-            Message message = currentDto.toMessage();
+            User sender = await userService.getById(currentDto.authorUuid);
+
+            Message message = currentDto.toMessage(sender.name);
 
             if (message.fileUrl != null) {
               final filenameFromUrl = message.fileUrl!.split('/').last;
@@ -181,7 +188,7 @@ class ChatService extends ChangeNotifier {
               if (existingMetadata != null) {
                 message = message.copyWith(imageMetadata: existingMetadata);
               } else {
-                final downloadedMetadata = await downloadAndSaveFile(currentDto);
+                final downloadedMetadata = await downloadAndSaveFile(message);
                 message = message.copyWith(imageMetadata: downloadedMetadata);
               }
             }
@@ -296,7 +303,7 @@ class ChatService extends ChangeNotifier {
       return;
     }
 
-    final wsUri = Uri.parse('ws://10.0.2.2:8082/ws/chat');
+    final wsUri = Uri.parse('ws://$_chatServiceAddress/ws/chat');
 
     try {
       final webSocket = await WebSocket.connect(
@@ -340,7 +347,7 @@ class ChatService extends ChangeNotifier {
   }
 
 
-  void _handleWebSocketMessages(dynamic data) {
+  Future<void> _handleWebSocketMessages(dynamic data) async{
     try {
       final jsonData = json.decode(data);
 
@@ -356,7 +363,7 @@ class ChatService extends ChangeNotifier {
         }
       }
 
-      GetMessageResponse dto = GetMessageResponse.fromJson(jsonData);
+      WebSocketMessageResponse dto = WebSocketMessageResponse.fromJson(jsonData);
 
       if (dto.fileUrl != null && !dto.fileUrl!.startsWith('http')) {
         dto = dto.copyWith(fileUrl: _backendBaseUrl + dto.fileUrl!);
@@ -366,7 +373,7 @@ class ChatService extends ChangeNotifier {
 
       
       if (message.fileUrl != null) {
-        _loadImageMetadataAndAddMessage(message, dto);
+        await _loadImageMetadataAndAddMessage(message);
         return;
       }
 
@@ -376,7 +383,7 @@ class ChatService extends ChangeNotifier {
     }
   }
 
-  Future<void> _loadImageMetadataAndAddMessage(Message initialMessage, GetMessageResponse dto) async {
+  Future<void> _loadImageMetadataAndAddMessage(Message initialMessage) async {
     try {
       final filenameFromUrl = initialMessage.fileUrl!.split('/').last;
 
@@ -391,10 +398,9 @@ class ChatService extends ChangeNotifier {
         finalMetadata = existingMetadata;
       } else {
         
-        finalMetadata = await downloadAndSaveFile(dto);
+        finalMetadata = await downloadAndSaveFile(initialMessage);
       }
 
-      
       final updatedMessage = initialMessage.copyWith(imageMetadata: finalMetadata);
       _messageStreamController.add(updatedMessage);
     } catch (e) {
@@ -411,18 +417,18 @@ class ChatService extends ChangeNotifier {
     _webSocketChannel.sink.add(json.encode(message));
   }
 
-  Future<ImageMetadata> downloadAndSaveFile(GetMessageResponse dto) async {
+  Future<ImageMetadata> downloadAndSaveFile(Message message) async {
     final token = await tokenService.getToken();
     final Directory appDocDir = await getApplicationDocumentsDirectory();
-    final String filenameFromUrl = dto.fileUrl!.split('/').last;
+    final String filenameFromUrl = message.fileUrl!.split('/').last;
     final String savePath = '${appDocDir.path}/app_images/$filenameFromUrl';
 
     await Directory('${appDocDir.path}/app_images').create(recursive: true);
 
-    print("ChatService: Downloading file from: ${dto.fileUrl!} to $savePath");
+    print("ChatService: Downloading file from: ${message.fileUrl!} to $savePath");
 
     await dio.download(
-      dto.fileUrl!,
+      message.fileUrl!,
       savePath,
       options: Options(headers: {
         'Authorization': 'Bearer $token',
@@ -432,7 +438,7 @@ class ChatService extends ChangeNotifier {
     return chatImageService.saveImage(XFile(
       savePath,
       name: filenameFromUrl,
-      mimeType: dto.fileType,
+      mimeType: message.fileType,
     ));
   }
 
@@ -478,11 +484,9 @@ class ChatService extends ChangeNotifier {
       throw Exception('An unexpected error occurred during chat deletion: $e');
     }
   }
-  
-
 
   
-  void _internalUpdateMessageListFromStream(Message message) async {
+  Future<void> _internalUpdateMessageListFromStream(Message message) async {
     final bool chatExistsLocally = chats.any((chat) => chat.id == message.chatId);
 
     if (!chatExistsLocally) {
