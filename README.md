@@ -37,6 +37,31 @@ Wszystkie trzy mikroserwisy backendowe są napisane w **Javie** z wykorzystaniem
 
 Do uruchomienia mikroserwisów niezbędne są **Docker** i **Docker Compose**.
 
+### Uruchomienie w sieci lokalnej ###
+
+1. **Zainstaluj aplikację mobilną pobraną z zakładki Releases**
+2. **Sklonuj repozytorium lub pobierz plik docker-compose-dockerhub.yml i uruchom mikroserwisy**
+    ```bash
+    docker-compose -f docker-compose-dockerhub.yml up
+    ```
+3. **Odzyskaj adres IPv4 serwera w ustawieniach systemu lub używając polecenia:**
+
+   Windows:
+    ```bash
+    ipconfig
+    ```
+    Linux:
+    ```bash
+    ip a
+    ```
+4. **Przejdź do zakładki Menu -> Konsultacje -> Development aplikacji mobilnej i ustaw adresy serwera (adres_serwera:8080) oraz usługi czatów (adres_serwera:8082)**
+
+   ***Uwaga: po wpisaniu prawidłowych adresów należy zrestartować aplikację mobilną!***
+
+### Uruchomienie w emulatorze ###
+
+
+
 1.  **Sklonuj repozytorium:**
     ```bash
     git clone https://github.com/zymxer/PG_SLEMA_CHAT
